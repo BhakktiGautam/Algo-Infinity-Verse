@@ -217,12 +217,14 @@
 }
 
 .faq-item a {
-    color: #7c3aed;
-    text-decoration: none;
+    color: `#7c3aed`;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .faq-item a:hover {
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
+}
 }
 
 /* Contact Links */
