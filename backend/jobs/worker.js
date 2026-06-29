@@ -2,17 +2,28 @@ import { Worker } from 'bullmq';
 import IORedis from 'ioredis';
 import { analyzeWorkflow } from '../repository-analyzer/cicdValidator.js';
 import { VCSFactory } from '../vcs/VCSFactory.js';
-import { batchStore, redisAvailable } from './queue.js';
+import { batchStore, redisAvailable, redisReady } from './queue.js';
 
 let auditWorker = null;
 
-const conn = redisAvailable
-  ? new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', {
-      maxRetriesPerRequest: null,
-    })
-  : null;
+// The Redis availability probe in queue.js runs asynchronously, so `redisAvailable`
+// is still `false` at module-evaluation time. Reading it synchronously here would
+// always skip worker creation — even when Redis is up — leaving bulk-audit jobs
+// enqueued to Redis but never consumed (they hang at "processing" forever).
+// Wait for the probe to settle before deciding whether to start the worker.
+async function startWorker() {
+  await redisReady;
 
-if (conn) {
+  if (!redisAvailable) {
+    // No Redis: enqueueBulkAudit() runs an in-process fallback, so no worker
+    // is needed.
+    return null;
+  }
+
+  const conn = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', {
+    maxRetriesPerRequest: null,
+  });
+
   auditWorker = new Worker('bulk-audit-queue', async (job) => {
     const { batchId, repoUrl } = job.data;
 
@@ -74,6 +85,15 @@ if (conn) {
   });
 
   console.log('Background Audit Worker started and listening for jobs...');
+  return auditWorker;
 }
 
-export { auditWorker };
+// Kick off worker startup as a module side effect. Errors are swallowed so a
+// Redis hiccup at boot doesn't crash the importing process; jobs fall back to
+// the in-process path in queue.js.
+const workerReady = startWorker().catch((err) => {
+  console.warn('Failed to start Background Audit Worker:', err.message);
+  return null;
+});
+
+export { auditWorker, startWorker, workerReady };

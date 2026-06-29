@@ -42,13 +42,14 @@
 
 .rust-playground-section .panel-header {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
   margin-bottom: 14px;
 }
 
 #rustExampleSelect {
+  width: 100%;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #475569;

@@ -37,13 +37,24 @@ async function checkRedis() {
   }
 }
 
-// Perform checking asynchronously
-checkRedis().catch(() => {});
+// Perform checking asynchronously. Consumers (e.g. the worker) must await this
+// promise before reading `redisAvailable`, otherwise they observe the initial
+// `false` value before the probe has resolved.
+const redisReady = checkRedis().catch(() => {});
+
+// Hard cap on repositories processed per bulk audit. Each URL fans out to one
+// or more outbound GitHub requests, so an unbounded list is an unauthenticated
+// denial-of-service / cost-amplification vector. Callers should reject larger
+// batches up front; this slice is a defense-in-depth backstop for any caller.
+export const MAX_BULK_AUDIT_URLS = 50;
 
 /**
  * Enqueues a batch of repositories for analysis.
  */
 export async function enqueueBulkAudit(batchId, repoUrls) {
+  // Defensive cap so a direct caller can never enqueue an unbounded batch.
+  repoUrls = repoUrls.slice(0, MAX_BULK_AUDIT_URLS);
+
   batchStore.set(batchId, {
     total: repoUrls.length,
     completed: 0,
@@ -103,4 +114,4 @@ export function getBatchProgress(batchId) {
   return { ...batch, progress };
 }
 
-export { bulkAuditQueue, redisAvailable };
+export { bulkAuditQueue, redisAvailable, redisReady };

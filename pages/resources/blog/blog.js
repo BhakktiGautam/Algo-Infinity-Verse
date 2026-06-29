@@ -1,3 +1,4 @@
+(() => {
 /**
  * blog.js
  * Handles routing, rendering, search, and filtering for the Blog page.
@@ -266,3 +267,4 @@ function showPostDetail(id) {
     els.detailView.className = 'view-active';
     document.title = `${post.title} | Algo Infinity Verse`;
 }
+})();
