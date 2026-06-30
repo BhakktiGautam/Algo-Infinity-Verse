@@ -5508,33 +5508,12 @@ function applyFilterFromURL() {
 // RENDER PROBLEMS WITH COUNT UPDATE
 // ============================================
 
-function renderProblems(problems) {
-    const problemsGrid = document.querySelector('.problems-grid');
-    if (!problemsGrid) return;
-    
-    // Update the count BEFORE rendering
-    updateProblemCount(problems);
-    
-    if (!problems || problems.length === 0) {
-        problemsGrid.innerHTML = '';
-        return;
-    }
-    
-    // Your existing render logic here
-    problemsGrid.innerHTML = problems.map(problem => {
-        // ... your problem card HTML ...
-        return `<div class="problem-card">...</div>`;
-    }).join('');
+const originalRenderProblems = window.renderProblems;
+if (typeof originalRenderProblems === 'function') {
+    window.renderProblems = function(problems) {
+        originalRenderProblems.call(this, problems);
+    };
 }
-
-// Override the existing renderProblems if needed
-const originalRenderProblems = window.renderProblems || function() {};
-window.renderProblems = function(problems) {
-    // Call update count
-    updateProblemCount(problems);
-    // Call original or your implementation
-    originalRenderProblems(problems);
-};
 
 // ============================================
 // COMPLETE FILTER IMPLEMENTATION
