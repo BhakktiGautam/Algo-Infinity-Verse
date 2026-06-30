@@ -5480,13 +5480,12 @@ function filterProblems() {
 /**
  * Get filter from URL hash on page load
  */
+const VALID_PROBLEM_FILTERS = new Set(['all', 'easy', 'medium', 'hard', 'favorites']);
+
 function getFilterFromURL() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#filter=')) {
-        const filter = hash.replace('#filter=', '');
-        return filter;
-    }
-    return 'all';
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const filter = params.get('filter') || 'all';
+    return VALID_PROBLEM_FILTERS.has(filter) ? filter : 'all';
 }
 
 /**
