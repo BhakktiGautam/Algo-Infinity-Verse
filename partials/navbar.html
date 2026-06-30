@@ -3,7 +3,33 @@
       <span class="logo-text">∞</span>
       <span class="logo-title">Algo Infinity Verse</span>
     </div>
+    
+    <!-- Desktop Search Bar -->
+    <div class="nav-search desktop-only">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="nav-search-input" placeholder="Search pages, topics, features..." aria-label="Search" autocomplete="off">
+        <button class="clear-search-btn" aria-label="Clear search" style="display: none;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="search-dropdown" style="display: none;"></div>
+    </div>
+
     <ul class="nav-links" id="navLinks">
+      <!-- Mobile Search Bar -->
+      <li class="nav-search-mobile mobile-only">
+        <div class="nav-search">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="nav-search-input" placeholder="Search pages, topics, features..." aria-label="Search" autocomplete="off">
+            <button class="clear-search-btn" aria-label="Clear search" style="display: none;">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="search-dropdown" style="display: none;"></div>
+        </div>
+      </li>
       <li class="nav-item">
         <a href="/index.html#home" class="nav-link">Home</a>
       </li>
@@ -133,7 +159,11 @@
           <a href="/pages/visualizers/bellman-ford-visualizer/bellman-ford-visualizer.html" class="dropdown-item" role="menuitem">Bellman-Ford & SPFA</a>
           <a href="/pages/visualizers/algorithm-genome/algorithm-genome.html" class="dropdown-item" role="menuitem">Algorithm Genome 🧬</a>
           <a href="/pages/visualizers/pathfinding-under-fire/pathfinding-under-fire.html" class="dropdown-item" role="menuitem">Pathfinding Under Fire 💥</a>
+          <a href="/pages/visualizers/gc-simulator/gc-simulator.html" class="dropdown-item" role="menuitem">Garbage Collector Simulator 🗑️</a>
           <a href="/pages/visualizers/memory-palace/memory-palace.html" class="dropdown-item" role="menuitem">Memory Palace — RAM Simulator</a>
+          <a href="/pages/visualizers/branch-predictor-simulator/branch-predictor-simulator.html" class="dropdown-item" role="menuitem">Branch Predictor Simulator</a>
+          <a href="/pages/visualizers/suffix-automaton-explorer/suffix-automaton-explorer.html" class="dropdown-item" role="menuitem">Suffix Automaton Explorer 🧬</a>
+          <a href="/pages/visualizers/anytime-algorithms-lab/anytime-algorithms-lab.html" class="dropdown-item" role="menuitem">Anytime Algorithms Lab ⏱️</a>
            <a href="/pages/visualizers/zkp-visualizer/zkp-visualizer.html" class="dropdown-item" role="menuitem">Zkp Visualizer</a>
            <a href="/pages/visualizers/rdbms-visualizer/rdbms-visualizer.html" class="dropdown-item" role="menuitem">RDBMS Visualizer</a>
             <a href="/pages/visualizers/sdlc-visualizer/sdlc-visualizer.html" class="dropdown-item" role="menuitem">SDLC Visualizer</a>
