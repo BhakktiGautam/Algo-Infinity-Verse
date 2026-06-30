@@ -6,16 +6,42 @@
  * @param {string} searchTerm - The term to highlight
  * @returns {string} HTML with highlighted text
  */
+const HTML_ESCAPE_MAP = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&`#39`;'
+};
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => HTML_ESCAPE_MAP[char]);
+}
+
 function highlightText(text, searchTerm) {
-    if (!text || !searchTerm || searchTerm.trim() === '') {
-        return text || '';
+    const source = String(text ?? '');
+    const term = String(searchTerm ?? '').trim();
+
+    if (!source || term === '') {
+        return escapeHtml(source);
     }
     
     // Escape special regex characters to prevent injection
-    const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(${escapedTerm})`, 'gi');
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedTerm, 'gi');
     
-    return text.replace(regex, '<span class="search-highlight">$1</span>');
+    let highlighted = '';
+    let lastIndex = 0;
+
+    source.replace(regex, (match, offset) => {
+        highlighted += escapeHtml(source.slice(lastIndex, offset));
+        highlighted += `<span class="search-highlight">${escapeHtml(match)}</span>`;
+        lastIndex = offset + match.length;
+        return match;
+    });
+
+    return highlighted + escapeHtml(source.slice(lastIndex));
+}
 }
 
 /**
