@@ -53,10 +53,16 @@
                     <span class="avatar-icon" id="profileAvatarEmoji">🚀</span>
                 </div>
                 <!-- Upload Overlay (clickable) -->
-                <div class="avatar-upload-overlay" id="avatarUploadOverlay" title="Change avatar">
+                <button
+                    type="button"
+                    class="avatar-upload-overlay"
+                    id="avatarUploadOverlay"
+                    aria-controls="avatarFileInput"
+                    title="Change avatar"
+                >
                     <i class="fas fa-camera"></i>
                     <span>Change</span>
-                </div>
+                </button>
                 <!-- Hidden file input -->
                 <input 
                     type="file" 
