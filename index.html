@@ -98,6 +98,20 @@
       <i class="fas fa-circle-chevron-up"></i>
     </button>
 
+    <!-- Back to Top Button -->
+    <button 
+        id="backToTop" 
+        class="back-to-top" 
+        aria-label="Back to top"
+        title="Scroll back to top"
+    >
+        <svg class="progress-ring" viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="progress-ring-bg" cx="22" cy="22" r="20"/>
+            <circle class="progress-ring-fill" cx="22" cy="22" r="20"/>
+        </svg>
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <!-- Navigation Bar (loaded from partial) -->
     <div id="navbar-placeholder"></div>
 
@@ -224,10 +238,17 @@
             </button>
           </div>
         </div>
+
+        <!-- UPDATED: Problem Counter Container -->
         <div class="problem-counter-container" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-          <div>
-            Showing <span id="visible-count">0</span> of
-            <span id="total-count">0</span> Problems
+          <div class="problem-stats">
+            <span class="problem-count-display">
+              Showing <strong id="visible-count">0</strong> 
+              <span id="problem-label">problems</span>
+              <span class="total-count-display">
+                (Total: <span id="total-count">0</span>)
+              </span>
+            </span>
           </div>
           <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <!-- Debounce and abort options -->
@@ -250,7 +271,19 @@
           </div>
           <p id="ai-recommend-status" class="sr-only" aria-live="polite"></p>
         </div>
+
+        <!-- Problems Grid -->
         <div class="problems-grid"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+            <i class="fas fa-search"></i>
+            <h3>No problems found</h3>
+            <p>Try adjusting your filters or search terms</p>
+            <button class="btn btn-secondary" id="clearFiltersBtn">
+                <i class="fas fa-undo"></i> Clear Filters
+            </button>
+        </div>
 
         <!-- Pagination Controls -->
          <div class="pagination-controls" id="paginationControls">
@@ -264,6 +297,7 @@
            </div>
       </div>
     </section>
+    
     <!-- DSA Flashcards Revision Section -->
     <section id="flashcards" class="section flashcards-section">
       <div class="container">

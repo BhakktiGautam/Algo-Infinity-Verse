@@ -4830,3 +4830,335 @@ window.addEventListener('load', () => {
     window.syncSpacedRepetitionDown();
   }
 });
+
+// ============================================
+// PROBLEM FILTERING WITH CORRECT COUNT
+// ============================================
+
+/**
+ * Get selected difficulty from filter buttons
+ * @returns {string} Selected difficulty ('all', 'easy', 'medium', 'hard')
+ */
+function getSelectedDifficulty() {
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        return activeFilter.dataset.filter || 'all';
+    }
+    return 'all';
+}
+
+/**
+ * Update the problem count display
+ * @param {Array} filteredProblems - Array of filtered problems
+ */
+function updateProblemCount(filteredProblems) {
+    // Update visible count
+    const visibleCountEl = document.getElementById('visible-count');
+    if (visibleCountEl) {
+        const total = filteredProblems.length;
+        visibleCountEl.textContent = total;
+    }
+    
+    // Update total count (if separate)
+    const totalCountEl = document.getElementById('total-count');
+    if (totalCountEl) {
+        // This should show total problems before filtering
+        const allProblems = getAllProblems();
+        totalCountEl.textContent = allProblems.length;
+    }
+    
+    // Update the problem count display (legacy)
+    const countElement = document.querySelector('.problem-count');
+    if (countElement) {
+        const total = filteredProblems.length;
+        countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
+    }
+    
+    // Show/hide empty state
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) {
+        if (filteredProblems.length === 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Get all problems (from your data source)
+ * @returns {Array} All practice problems
+ */
+function getAllProblems() {
+    // Use your existing problems data
+    return practiceProblems || window.practiceProblems || [];
+}
+
+/**
+ * Filter problems based on selected difficulty
+ * @param {string} difficulty - 'all', 'easy', 'medium', 'hard'
+ * @param {Array} problems - Problems to filter
+ * @returns {Array} Filtered problems
+ */
+function filterProblemsByDifficulty(difficulty, problems) {
+    if (difficulty === 'all') {
+        return problems;
+    }
+    return problems.filter(problem => 
+        problem.difficulty.toLowerCase() === difficulty.toLowerCase()
+    );
+}
+
+/**
+ * Main filter function - handles filtering AND count update
+ */
+function filterProblems() {
+    const selectedDifficulty = getSelectedDifficulty();
+    const allProblems = getAllProblems();
+    
+    // Filter problems
+    const filtered = filterProblemsByDifficulty(selectedDifficulty, allProblems);
+    
+    // Render filtered problems
+    renderProblems(filtered);
+    
+    // Update count
+    updateProblemCount(filtered);
+    
+    // Update URL hash if needed (for bookmarking)
+    if (selectedDifficulty !== 'all') {
+        window.location.hash = `filter=${selectedDifficulty}`;
+    }
+}
+
+/**
+ * Get filter from URL hash on page load
+ */
+function getFilterFromURL() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#filter=')) {
+        const filter = hash.replace('#filter=', '');
+        return filter;
+    }
+    return 'all';
+}
+
+/**
+ * Apply filter on page load from URL
+ */
+function applyFilterFromURL() {
+    const filter = getFilterFromURL();
+    if (filter !== 'all') {
+        const filterBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+        if (filterBtn) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            filterBtn.classList.add('active');
+        }
+    }
+    filterProblems();
+}
+
+// ============================================
+// RENDER PROBLEMS WITH COUNT UPDATE
+// ============================================
+
+function renderProblems(problems) {
+    const problemsGrid = document.querySelector('.problems-grid');
+    if (!problemsGrid) return;
+    
+    // Update the count BEFORE rendering
+    updateProblemCount(problems);
+    
+    if (!problems || problems.length === 0) {
+        problemsGrid.innerHTML = '';
+        return;
+    }
+    
+    // Your existing render logic here
+    problemsGrid.innerHTML = problems.map(problem => {
+        // ... your problem card HTML ...
+        return `<div class="problem-card">...</div>`;
+    }).join('');
+}
+
+// Override the existing renderProblems if needed
+const originalRenderProblems = window.renderProblems || function() {};
+window.renderProblems = function(problems) {
+    // Call update count
+    updateProblemCount(problems);
+    // Call original or your implementation
+    originalRenderProblems(problems);
+};
+
+// ============================================
+// COMPLETE FILTER IMPLEMENTATION
+// ============================================
+
+// Initialize filter buttons on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize filter buttons
+    initFilterButtons();
+    
+    // Apply filter from URL if any
+    applyFilterFromURL();
+    
+    // Initial render
+    filterProblems();
+});
+
+/**
+ * Initialize filter buttons with event listeners
+ */
+function initFilterButtons() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach((btn) => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all
+            filterButtons.forEach((b) => b.classList.remove('active'));
+            
+            // Add active class to clicked
+            this.classList.add('active');
+            
+            // Reset pagination to page 1
+            currentPage = 1;
+            
+            // Filter and render
+            filterProblems();
+        });
+    });
+    
+    // Clear filters button
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', function() {
+            // Reset to 'all'
+            filterButtons.forEach((b) => b.classList.remove('active'));
+            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+            if (allBtn) allBtn.classList.add('active');
+            
+            // Clear search
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                currentSearch = '';
+            }
+            
+            // Reset and render
+            currentPage = 1;
+            filterProblems();
+        });
+    }
+}
+
+/**
+ * Get selected difficulty from active filter button
+ */
+function getSelectedDifficulty() {
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        return activeFilter.dataset.filter || 'all';
+    }
+    return 'all';
+}
+
+/**
+ * Get all problems
+ */
+function getAllProblems() {
+    return practiceProblems || [];
+}
+
+/**
+ * Filter problems by difficulty
+ */
+function filterProblemsByDifficulty(difficulty, problems) {
+    if (difficulty === 'all') {
+        return problems;
+    }
+    if (difficulty === 'favorites') {
+        return problems.filter(p => userProgress.favoriteProblems.includes(p.id));
+    }
+    return problems.filter(problem => 
+        problem.difficulty.toLowerCase() === difficulty.toLowerCase()
+    );
+}
+
+/**
+ * Filter problems with search and difficulty
+ */
+function filterProblems() {
+    const selectedDifficulty = getSelectedDifficulty();
+    const allProblems = getAllProblems();
+    const searchTerm = currentSearch || '';
+    
+    // Filter by difficulty
+    let filtered = filterProblemsByDifficulty(selectedDifficulty, allProblems);
+    
+    // Filter by search term
+    if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(problem => 
+            problem.title.toLowerCase().includes(term) ||
+            problem.tags.some(tag => tag.toLowerCase().includes(term)) ||
+            (problem.description && problem.description.toLowerCase().includes(term))
+        );
+    }
+    
+    // Update count
+    updateProblemCount(filtered);
+    
+    // Render with pagination
+    renderProblemsWithPagination(filtered);
+}
+
+/**
+ * Render problems with pagination
+ */
+function renderProblemsWithPagination(filteredProblems) {
+    const totalProblems = filteredProblems.length;
+    const totalPages = Math.max(1, Math.ceil(totalProblems / PROBLEMS_PER_PAGE));
+    
+    if (currentPage > totalPages) currentPage = totalPages;
+    
+    const start = (currentPage - 1) * PROBLEMS_PER_PAGE;
+    const end = Math.min(start + PROBLEMS_PER_PAGE, totalProblems);
+    const pageProblems = filteredProblems.slice(start, end);
+    
+    // Render the problems
+    renderProblems(pageProblems);
+    
+    // Update pagination
+    updatePaginationControls(currentPage, totalPages);
+}
+
+/**
+ * Update problem count display
+ */
+function updateProblemCount(filteredProblems) {
+    const visibleCountEl = document.getElementById('visible-count');
+    const totalCountEl = document.getElementById('total-count');
+    const problemLabel = document.getElementById('problem-label');
+    
+    if (visibleCountEl) {
+        const total = filteredProblems.length;
+        visibleCountEl.textContent = total;
+    }
+    
+    if (totalCountEl) {
+        const allProblems = getAllProblems();
+        totalCountEl.textContent = allProblems.length;
+    }
+    
+    if (problemLabel) {
+        const total = filteredProblems.length;
+        problemLabel.textContent = total === 1 ? 'problem' : 'problems';
+    }
+    
+    // Legacy support
+    const countElement = document.querySelector('.problem-count');
+    if (countElement) {
+        const total = filteredProblems.length;
+        countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
+    }
+}
