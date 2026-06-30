@@ -9402,7 +9402,8 @@ mark.search-highlight {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.back-to-top:hover::after {
+.back-to-top:hover::after,
+.back-to-top:focus-visible::after {
     opacity: 1;
     visibility: visible;
 }
