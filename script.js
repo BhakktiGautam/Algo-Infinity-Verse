@@ -5560,11 +5560,11 @@ function initFilterButtons() {
     
     filterButtons.forEach((btn) => {
         btn.addEventListener('click', function() {
-            // Remove active class from all
-            filterButtons.forEach((b) => b.classList.remove('active'));
-            
-            // Add active class to clicked
-            this.classList.add('active');
+            filterButtons.forEach((b) => {
+                const isActive = b === this;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-pressed', String(isActive));
+            });
             
             // Reset pagination to page 1
             currentPage = 1;
