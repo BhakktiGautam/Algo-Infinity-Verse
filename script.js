@@ -3804,6 +3804,24 @@ async function executeCode(code, lang, problem) {
     memory: memory || "N/A",
     cpuTime: cpuTime || "N/A"
   };
+
+  if (lang === 'javascript') {
+    if (typeof window.analyzeComplexity !== 'function') {
+      await new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'modules/complexity-client.js';
+        script.onload = resolve;
+        script.onerror = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    if (typeof window.analyzeComplexity === 'function') {
+      const complexity = await window.analyzeComplexity(code);
+      if (complexity) {
+        parsedResults.metrics.complexity = complexity;
+      }
+    }
+  }
   
   return parsedResults;
 }
@@ -3853,9 +3871,11 @@ async function runQuizCode() {
       setOutput(out, "error");
     }
     if (result.metrics && result.metrics.cpuTime) {
-      const metricText = `\n\n⏱️ Execution Time: ${result.metrics.cpuTime} sec\n💾 Memory Used: ${result.metrics.memory} KB`;
+      let metricText = `\n\n⏱️ Execution Time: ${result.metrics.cpuTime} sec\n💾 Memory Used: ${result.metrics.memory} KB`;
+      if (result.metrics.complexity) {
+        metricText += `\n📊 Time Complexity: ${result.metrics.complexity}`;
+      }
       const el = document.getElementById("quizOutputContent");
-      if (el) el.innerHTML += `<pre style="color:var(--accent); margin-top:10px;">${metricText}</pre>`;
       if (el) {
         const metricsEl = document.createElement("pre");
         metricsEl.style.color = "var(--accent)";
@@ -5376,6 +5396,7 @@ window.addEventListener('load', () => {
     window.syncSpacedRepetitionDown();
   }
 });
+
 // ============================================
 // SEARCH AUTOCOMPLETE
 // ============================================
@@ -5618,10 +5639,221 @@ function selectSuggestion(text, id, type) {
 function getProblemById(id) {
     const problems = getProblems();
     return problems.find(p => p.id === parseInt(id)) || null;
+
+
+// ============================================
+// PROBLEM FILTERING WITH CORRECT COUNT
+// ============================================
+
+/**
+ * Get selected difficulty from filter buttons
+ * @returns {string} Selected difficulty ('all', 'easy', 'medium', 'hard')
+ */
+function getSelectedDifficulty() {
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        return activeFilter.dataset.filter || 'all';
+    }
+    return 'all';
+}
+
+/**
+ * Update the problem count display
+ * @param {Array} filteredProblems - Array of filtered problems
+ */
+function updateProblemCount(filteredProblems) {
+    // Update visible count
+    const visibleCountEl = document.getElementById('visible-count');
+    if (visibleCountEl) {
+        const total = filteredProblems.length;
+        visibleCountEl.textContent = total;
+    }
+    
+    // Update total count (if separate)
+    const totalCountEl = document.getElementById('total-count');
+    if (totalCountEl) {
+        // This should show total problems before filtering
+        const allProblems = getAllProblems();
+        totalCountEl.textContent = allProblems.length;
+    }
+    
+    // Update the problem count display (legacy)
+    const countElement = document.querySelector('.problem-count');
+    if (countElement) {
+        const total = filteredProblems.length;
+        countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
+    }
+    
+    // Show/hide empty state
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) {
+        if (filteredProblems.length === 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Get all problems (from your data source)
+ * @returns {Array} All practice problems
+ */
+function getAllProblems() {
+    // Use your existing problems data
+    return practiceProblems || window.practiceProblems || [];
+}
+
+/**
+ * Filter problems based on selected difficulty
+ * @param {string} difficulty - 'all', 'easy', 'medium', 'hard'
+ * @param {Array} problems - Problems to filter
+ * @returns {Array} Filtered problems
+ */
+function filterProblemsByDifficulty(difficulty, problems) {
+    if (difficulty === 'all') {
+        return problems;
+    }
+    return problems.filter(problem => 
+        problem.difficulty.toLowerCase() === difficulty.toLowerCase()
+    );
+}
+
+/**
+ * Main filter function - handles filtering AND count update
+ */
+function filterProblems() {
+    const selectedDifficulty = getSelectedDifficulty();
+    const allProblems = getAllProblems();
+    
+    // Filter problems
+    const filtered = filterProblemsByDifficulty(selectedDifficulty, allProblems);
+    
+    // Render filtered problems
+    renderProblems(filtered);
+    
+    // Update count
+    updateProblemCount(filtered);
+    
+    // Update URL hash if needed (for bookmarking)
+    if (selectedDifficulty !== 'all') {
+        window.location.hash = `filter=${selectedDifficulty}`;
+    }
+}
+
+/**
+ * Get filter from URL hash on page load
+ */
+const VALID_PROBLEM_FILTERS = new Set(['all', 'easy', 'medium', 'hard', 'favorites']);
+
+function getFilterFromURL() {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const filter = params.get('filter') || 'all';
+    return VALID_PROBLEM_FILTERS.has(filter) ? filter : 'all';
+}
+
+/**
+ * Apply filter on page load from URL
+ */
+function applyFilterFromURL() {
+    const filter = getFilterFromURL();
+    if (filter !== 'all') {
+        const filterBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+        if (filterBtn) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            filterBtn.classList.add('active');
+        }
+    }
+    filterProblems();
+}
+
+// ============================================
+// RENDER PROBLEMS WITH COUNT UPDATE
+// ============================================
+
+const originalRenderProblems = window.renderProblems;
+if (typeof originalRenderProblems === 'function') {
+    window.renderProblems = function(problems) {
+        originalRenderProblems.call(this, problems);
+    };
+}
+
+// ============================================
+// COMPLETE FILTER IMPLEMENTATION
+// ============================================
+
+// Initialize filter buttons on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize filter buttons
+    initFilterButtons();
+    
+    // Apply filter from URL if any
+    applyFilterFromURL();
+    
+    // Initial render
+    filterProblems();
+});
+
+/**
+ * Initialize filter buttons with event listeners
+ */
+function initFilterButtons() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach((btn) => {
+        btn.addEventListener('click', function() {
+            filterButtons.forEach((b) => {
+                const isActive = b === this;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-pressed', String(isActive));
+            });
+            
+            // Reset pagination to page 1
+            currentPage = 1;
+            
+            // Filter and render
+            filterProblems();
+        });
+    });
+    
+    // Clear filters button
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', function() {
+            // Reset to 'all'
+            filterButtons.forEach((b) => b.classList.remove('active'));
+            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+            if (allBtn) allBtn.classList.add('active');
+            
+            // Clear search
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                currentSearch = '';
+            }
+            
+            // Reset and render
+            currentPage = 1;
+            filterProblems();
+        });
+    }
+}
+
+/**
+ * Get selected difficulty from active filter button
+ */
+function getSelectedDifficulty() {
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        return activeFilter.dataset.filter || 'all';
+    }
+    return 'all';
+
 }
 
 /**
  * Get all problems
+
  * @returns {Array} List of problems
  */
 function getProblems() {
@@ -5794,3 +6026,106 @@ export {
     highlightMatch,
     initSearchAutocomplete
 };
+
+ */
+function getAllProblems() {
+    return practiceProblems || [];
+}
+
+/**
+ * Filter problems by difficulty
+ */
+function filterProblemsByDifficulty(difficulty, problems) {
+    if (difficulty === 'all') {
+        return problems;
+    }
+    if (difficulty === 'favorites') {
+        return problems.filter(p => userProgress.favoriteProblems.includes(p.id));
+    }
+    return problems.filter(problem => 
+        problem.difficulty.toLowerCase() === difficulty.toLowerCase()
+    );
+}
+
+/**
+ * Filter problems with search and difficulty
+ */
+function filterProblems() {
+    const selectedDifficulty = getSelectedDifficulty();
+    const allProblems = getAllProblems();
+    const searchTerm = currentSearch || '';
+    
+    // Filter by difficulty
+    let filtered = filterProblemsByDifficulty(selectedDifficulty, allProblems);
+    
+    // Filter by search term
+    if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(problem => 
+            problem.title.toLowerCase().includes(term) ||
+            problem.tags.some(tag => tag.toLowerCase().includes(term)) ||
+            (problem.description && problem.description.toLowerCase().includes(term))
+        );
+    }
+    
+    // Update count
+    updateProblemCount(filtered);
+    
+    // Render with pagination
+    renderProblemsWithPagination(filtered);
+}
+
+/**
+ * Render problems with pagination
+ */
+function renderProblemsWithPagination(filteredProblems) {
+    const totalProblems = filteredProblems.length;
+    const totalPages = Math.max(1, Math.ceil(totalProblems / PROBLEMS_PER_PAGE));
+    
+    if (currentPage > totalPages) currentPage = totalPages;
+    
+    const start = (currentPage - 1) * PROBLEMS_PER_PAGE;
+    const end = Math.min(start + PROBLEMS_PER_PAGE, totalProblems);
+    const pageProblems = filteredProblems.slice(start, end);
+    
+    // Render the problems
+    renderProblems(pageProblems);
+    
+    // Update pagination
+    updatePaginationControls(currentPage, totalPages);
+}
+
+/**
+ * Update problem count display
+ */
+function updateProblemCount(filteredProblems) {
+    const total = filteredProblems.length;
+    const visibleCountEl = document.getElementById('visible-count');
+    const totalCountEl = document.getElementById('total-count');
+    const problemLabel = document.getElementById('problem-label');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (visibleCountEl) {
+        visibleCountEl.textContent = total;
+    }
+    
+    if (totalCountEl) {
+        const allProblems = getAllProblems();
+        totalCountEl.textContent = allProblems.length;
+    }
+    
+    if (problemLabel) {
+        problemLabel.textContent = total === 1 ? 'problem' : 'problems';
+    }
+    
+    if (emptyState) {
+        emptyState.classList.toggle('hidden', total !== 0);
+    }
+    
+    // Legacy support
+    const countElement = document.querySelector('.problem-count');
+    if (countElement) {
+        countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
+    }
+}
+

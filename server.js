@@ -2978,10 +2978,7 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
-// The core HTTP request handler. Exported as `requestHandler` so the Vercel
-// catch-all serverless entry (api/[...path].js) can delegate every server-only
-// /api/* route to it, and used directly to back the `server` instance below.
-async function requestHandler(req, res) {
+const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     const pathname = normalizePathname(decodeURIComponent(url.pathname));
@@ -3013,9 +3010,7 @@ async function requestHandler(req, res) {
     console.error(error);
     sendJson(res, 500, { error: "Something went wrong." });
   }
-}
-
-const server = http.createServer(requestHandler);
+});
 
 // ===== CODE ANALYSIS ENGINE =====
 // Used by the POST /api/predict-acceptance route in handleApi().
@@ -3459,7 +3454,7 @@ socket.on('voice-ice', ({ roomId, candidate, to, from }) => {
 });
 // -----------------------------------------
 
-export { server, requestHandler, hashPassword, passwordMatches, applySM2, validateSignup, updateMemoryStore, readMemoryStore };
+export { server, hashPassword, passwordMatches, applySM2, validateSignup, updateMemoryStore, readMemoryStore };
 if (process.env.VERCEL === "1") {
   db = initializeFirebase();
   useFirestore = !!db;
@@ -3502,4 +3497,4 @@ if (process.env.VERCEL !== "1" && process.env.NODE_ENV !== "test") {
       console.error("Failed to load environment configuration:", error);
       process.exit(1);
     });
-}
+  }
