@@ -1013,6 +1013,12 @@ function initBackToTop() {
      * Scroll to top smoothly
      */
     function scrollToTop() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            window.scrollTo(0, 0);
+            updateProgressRing(0);
+            return;
+        }
+
         const startY = window.scrollY || window.pageYOffset;
         const duration = 500;
         const startTime = performance.now();
