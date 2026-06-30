@@ -86,12 +86,19 @@ function renderProblems(problems, searchTerm = '') {
     container.innerHTML = '';
     
     if (!problems || problems.length === 0) {
-        container.innerHTML = `
-            <div class="no-results">
-                <i class="fas fa-search"></i>
-                <p>No problems found matching "<strong>${searchTerm}</strong>"</p>
-            </div>
-        `;
+        const noResults = document.createElement('div');
+        noResults.className = 'no-results';
+
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-search';
+
+        const message = document.createElement('p');
+        const term = document.createElement('strong');
+        term.textContent = searchTerm;
+        message.append('No problems found matching "', term, '"');
+
+        noResults.append(icon, message);
+        container.appendChild(noResults);
         return;
     }
     
