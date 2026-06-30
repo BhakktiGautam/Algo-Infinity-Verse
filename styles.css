@@ -9850,6 +9850,87 @@ mark.search-highlight {
         margin-left: 42px;
 
 
+/* ===== PROBLEM STATS ===== */
+
+.problem-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0 16px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.problem-count-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.problem-count-display strong {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.total-count-display {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    grid-column: 1 / -1;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.empty-state.hidden {
+    display: none;
+}
+
+/* Dark Theme */
+.dark .problem-count-display strong {
+    color: #f1f5f9;
+}
+
+.dark .empty-state i {
+    color: #475569;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .problem-stats {
+        font-size: 0.85rem;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .empty-state {
+        padding: 40px 16px;
+    }
+    
+    .empty-state i {
+        font-size: 36px;
+
+
 /* ===== BACK TO TOP BUTTON ===== */
 
 .back-to-top {
@@ -10012,5 +10093,6 @@ mark.search-highlight {
 @media (hover: none) {
     .back-to-top::after {
         display: none;
+
     }
 }

@@ -486,10 +486,17 @@
             </button>
           </div>
         </div>
+
+        <!-- UPDATED: Problem Counter Container -->
         <div class="problem-counter-container" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-          <div>
-            Showing <span id="visible-count">0</span> of
-            <span id="total-count">0</span> Problems
+          <div class="problem-stats">
+            <span class="problem-count-display">
+              Showing <strong id="visible-count">0</strong> 
+              <span id="problem-label">problems</span>
+              <span class="total-count-display">
+                (Total: <span id="total-count">0</span>)
+              </span>
+            </span>
           </div>
           <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <!-- Debounce and abort options -->
@@ -512,7 +519,19 @@
           </div>
           <p id="ai-recommend-status" class="sr-only" aria-live="polite"></p>
         </div>
+
+        <!-- Problems Grid -->
         <div class="problems-grid"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+            <i class="fas fa-search"></i>
+            <h3>No problems found</h3>
+            <p>Try adjusting your filters or search terms</p>
+            <button class="btn btn-secondary" id="clearFiltersBtn">
+                <i class="fas fa-undo"></i> Clear Filters
+            </button>
+        </div>
 
         <!-- Pagination Controls -->
          <div class="pagination-controls" id="paginationControls">
@@ -2233,7 +2252,7 @@
     <script src="timer.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="utils/searchEngine.js"></script>
-    <script src="modules/domSanitizer.js"></script>
+    <script type="module" src="modules/domSanitizer.js"></script>
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="auth-gate.js"></script>
