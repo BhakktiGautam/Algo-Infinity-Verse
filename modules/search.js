@@ -53,7 +53,9 @@ function searchProblems(searchTerm) {
     if (!container) return;
     
     // Get problems from your data source
-    const problems = window.problemsData || getAllProblems();
+    const problems = Array.isArray(window.problemsData)
+        ? window.problemsData
+        : (typeof window.getAllProblems === 'function' ? window.getAllProblems() : []);
     
     if (!searchTerm || searchTerm.trim() === '') {
         renderProblems(problems, '');
