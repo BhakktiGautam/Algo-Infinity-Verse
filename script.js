@@ -5682,12 +5682,13 @@ function renderProblemsWithPagination(filteredProblems) {
  * Update problem count display
  */
 function updateProblemCount(filteredProblems) {
+    const total = filteredProblems.length;
     const visibleCountEl = document.getElementById('visible-count');
     const totalCountEl = document.getElementById('total-count');
     const problemLabel = document.getElementById('problem-label');
+    const emptyState = document.getElementById('emptyState');
     
     if (visibleCountEl) {
-        const total = filteredProblems.length;
         visibleCountEl.textContent = total;
     }
     
@@ -5697,14 +5698,16 @@ function updateProblemCount(filteredProblems) {
     }
     
     if (problemLabel) {
-        const total = filteredProblems.length;
         problemLabel.textContent = total === 1 ? 'problem' : 'problems';
+    }
+    
+    if (emptyState) {
+        emptyState.classList.toggle('hidden', total !== 0);
     }
     
     // Legacy support
     const countElement = document.querySelector('.problem-count');
     if (countElement) {
-        const total = filteredProblems.length;
         countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
     }
 }
