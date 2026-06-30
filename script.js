@@ -1,4 +1,68 @@
 // ============================================
+// DOM SANITIZER FALLBACK (if not loaded externally)
+// ============================================
+if (typeof window !== 'undefined' && !window.DOMSanitizer) {
+  const fallbackEscapeHtml = (unsafe) => {
+    if (unsafe === null || unsafe === undefined) return '';
+    return String(unsafe)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  };
+
+  const fallbackSanitizeHTML = (htmlStr) => {
+    if (htmlStr === null || htmlStr === undefined) return '';
+    const stringified = String(htmlStr);
+    if (typeof DOMParser !== 'undefined') {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(stringified, 'text/html');
+        const cleanNode = (node) => {
+          if (node.nodeType === 3) return;
+          if (node.nodeType !== 1) { node.remove(); return; }
+          const tag = node.tagName.toLowerCase();
+          const blacklist = ['script', 'iframe', 'object', 'embed', 'style', 'link', 'meta', 'svg', 'math'];
+          if (blacklist.includes(tag)) { node.remove(); return; }
+          const attrs = Array.from(node.attributes);
+          attrs.forEach(attr => {
+            const name = attr.name.toLowerCase();
+            const value = attr.value.toLowerCase();
+            if (name.startsWith('on') || value.startsWith('javascript:')) {
+              node.removeAttribute(attr.name);
+            }
+          });
+          Array.from(node.childNodes).forEach(cleanNode);
+        };
+        Array.from(doc.body.childNodes).forEach(cleanNode);
+        return doc.body.innerHTML;
+      } catch (e) {
+        console.error('DOMParser fallback sanitization failed, using escapeHtml:', e);
+        return fallbackEscapeHtml(stringified);
+      }
+    }
+    return stringified
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/\s*href\s*=\s*["']javascript:[^"']*["']/gi, '');
+  };
+
+  window.DOMSanitizer = {
+    escapeHtml: fallbackEscapeHtml,
+    sanitizeHTML: fallbackSanitizeHTML,
+    safeRender: (element, content, asHTML = false) => {
+      if (!element) return;
+      if (!asHTML) {
+        element.textContent = content;
+      } else {
+        element.innerHTML = fallbackSanitizeHTML(content);
+      }
+    }
+  };
+}
+
+// ============================================
 // UTILITY FUNCTIONS (Memoization & Debounce)
 // ============================================
 function debounce(func, wait) {
@@ -497,46 +561,61 @@ let currentProblem = null;
 // ==========================================
 // 1. SINGLE CENTRALIZED INITIALIZATION
 // ==========================================
+function safeInit(name, fn, feature) {
+  try {
+    if (typeof fn === 'function') {
+      fn();
+    } else {
+      console.warn(`Initializer ${name} is not a function`);
+    }
+  } catch (err) {
+    console.error(`Error during ${name} initialization:`, err);
+    if (window.reportError) {
+      window.reportError(err, feature || name);
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOMContentLoaded fired, initializing app...');
-  loadUserData();
-  //initFlashcardsRevision();
+  safeInit('loadUserData', loadUserData);
+  //safeInit('initFlashcardsRevision', initFlashcardsRevision);
 
-  initLoadingScreen();
-  initNavbar();
-  initHeroSection();
-  initTopicsSection();
-  initQuizSection();
-  initPracticeSection();
-  initRoadmap();
-  initDashboard();
-  initGamification();
-  initChatbot();
-  initProfile();
-  initScrollEffects();
+  safeInit('initLoadingScreen', initLoadingScreen);
+  safeInit('initNavbar', initNavbar);
+  safeInit('initHeroSection', initHeroSection);
+  safeInit('initTopicsSection', initTopicsSection, 'topics');
+  safeInit('initQuizSection', initQuizSection, 'quiz');
+  safeInit('initPracticeSection', initPracticeSection, 'practice');
+  safeInit('initRoadmap', initRoadmap, 'roadmap');
+  safeInit('initDashboard', initDashboard, 'dashboard');
+  safeInit('initGamification', initGamification, 'gamification');
+  safeInit('initChatbot', initChatbot, 'chatbot');
+  safeInit('initProfile', initProfile, 'profile');
+  safeInit('initScrollEffects', initScrollEffects);
   console.log('App initialization complete');
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadUserData();
-  initLoadingScreen();
-  initNavbar();
-  initHeroSection();
-  initTopicOfTheDay();
-  initTopicsSection();
-  initQuizSection();
-  initPracticeSection();
-  initRoadmap();
-  initDashboard();
-  initGamification();
-  initDailyChallenge();
-  initChatbot();
-  initProfile();
-  initAiInterviewer();
-  initNewsletterValidation();
-  initScrollEffects();
-  initFooterCurrentDate();
-  updateProfile();
+  safeInit('loadUserData', loadUserData);
+  safeInit('initLoadingScreen', initLoadingScreen);
+  safeInit('initNavbar', initNavbar);
+  safeInit('initHeroSection', initHeroSection);
+  safeInit('initTopicOfTheDay', initTopicOfTheDay, 'topics');
+  safeInit('initTopicsSection', initTopicsSection, 'topics');
+  safeInit('initQuizSection', initQuizSection, 'quiz');
+  safeInit('initPracticeSection', initPracticeSection, 'practice');
+  safeInit('initRoadmap', initRoadmap, 'roadmap');
+  safeInit('initDashboard', initDashboard, 'dashboard');
+  safeInit('initGamification', initGamification, 'gamification');
+  safeInit('initDailyChallenge', initDailyChallenge, 'gamification');
+  safeInit('initChatbot', initChatbot, 'chatbot');
+  safeInit('initProfile', initProfile, 'profile');
+  safeInit('initAiInterviewer', initAiInterviewer, 'editor');
+  safeInit('initNewsletterValidation', initNewsletterValidation);
+  safeInit('initScrollEffects', initScrollEffects);
+  safeInit('initFooterCurrentDate', initFooterCurrentDate);
+  safeInit('updateProfile', updateProfile, 'profile');
 });
 
 // ============================================
@@ -618,9 +697,8 @@ function initAiInterviewer() {
         bubble.setAttribute('role', 'status');
         bubble.setAttribute('aria-live', 'polite');
 
-        const hintText = document.createTextNode(data.hint);
         const hintSpan = document.createElement('span');
-        hintSpan.appendChild(hintText);
+        hintSpan.innerHTML = window.DOMSanitizer.sanitizeHTML(data.hint);
 
         bubble.innerHTML = `
             <div class="ai-hint-header">
@@ -932,7 +1010,7 @@ function initTopicsSection() {
     card.className = "topic-card animate-in";
     card.style.animationDelay = `${index * 0.1}s`;
     const progress = getTopicProgress(topic.name);
-    card.innerHTML = `<div class="topic-icon">${topic.icon}</div><h3 class="topic-name">${topic.name}</h3><p class="topic-desc">${topic.description}</p><div class="topic-meta"><span class="difficulty-badge ${getDifficultyClass(topic.difficulty)}">${topic.difficulty}</span><span class="topic-count">${progress.total} problems</span></div><div class="topic-mastery"><div class="mastery-header"><span class="mastery-label">Progress</span><span class="mastery-stats">${progress.completed}/${progress.total} solved</span></div><div class="mastery-bar"><div class="mastery-fill" style="width: ${progress.percentage}%"></div></div><span class="mastery-percentage">${progress.percentage}%</span></div>`;
+    card.innerHTML = `<div class="topic-icon">${topic.icon}</div><h3 class="topic-name">${escapeHtml(topic.name)}</h3><p class="topic-desc">${escapeHtml(topic.description)}</p><div class="topic-meta"><span class="difficulty-badge ${getDifficultyClass(topic.difficulty)}">${escapeHtml(topic.difficulty)}</span><span class="topic-count">${progress.total} problems</span></div><div class="topic-mastery"><div class="mastery-header"><span class="mastery-label">Progress</span><span class="mastery-stats">${progress.completed}/${progress.total} solved</span></div><div class="mastery-bar"><div class="mastery-fill" style="width: ${progress.percentage}%"></div></div><span class="mastery-percentage">${progress.percentage}%</span></div>`;
     topicsGrid.appendChild(card);
     card.addEventListener("click", () => openTopicModal(topic));
   });
@@ -952,9 +1030,9 @@ function openTopicModal(topic) {
   const modalTitle = document.getElementById("modalTitle");
   if (modalTitle) modalTitle.textContent = topic.name;
   const modalTheory = document.getElementById("modalTheory");
-  if (modalTheory) modalTheory.innerHTML = topic.theory;
+  if (modalTheory) modalTheory.innerHTML = window.DOMSanitizer.sanitizeHTML(topic.theory);
   const modalDifficulty = document.getElementById("modalDifficulty");
-  if (modalDifficulty) modalDifficulty.innerHTML = `<span class="difficulty-badge ${getDifficultyClass(topic.difficulty)}">${topic.difficulty}</span>`;
+  if (modalDifficulty) modalDifficulty.innerHTML = `<span class="difficulty-badge ${getDifficultyClass(topic.difficulty)}">${escapeHtml(topic.difficulty)}</span>`;
   const problemsList = document.getElementById("modalProblems");
   if (problemsList) {
     problemsList.innerHTML = topic.problems
@@ -964,9 +1042,9 @@ function openTopicModal(topic) {
           <button
             type="button"
             class="sample-problem-item"
-            data-problem-name="${p.replace(/"/g, "&quot;")}"
+            data-problem-name="${escapeHtml(p)}"
             style="width:100%; text-align:left; cursor:pointer; padding:0.6rem 1rem; border-radius:8px; border:1px solid var(--glass-border); transition:all 0.2s ease;"
-          >${p}</button>
+          >${escapeHtml(p)}</button>
         </li>`
       )
       .join("");
@@ -1028,7 +1106,7 @@ function initQuizSection() {
     const card = document.createElement("div");
     card.className = "quiz-card animate-in";
     card.style.animationDelay = `${index * 0.1}s`;
-    card.innerHTML = `<div class="quiz-card-icon">${topic.icon}</div><h3 class="quiz-card-title">${topic.name}</h3><p class="quiz-card-desc">Test your knowledge with 10 unique questions</p><div class="quiz-card-meta"><span class="quiz-count">10 Questions</span><span class="quiz-difficulty ${getDifficultyClass(topic.difficulty)}">${topic.difficulty}</span></div><div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progress-${topicKey}"></div></div><div class="quiz-stats"><span>Best: <strong id="best-${topicKey}">--</strong></span><span>Attempts: <strong id="attempts-${topicKey}">0</strong></span></div><button class="btn btn-primary start-quiz-btn" data-topic="${topicKey}"><i class="fas fa-play"></i> Start Quiz</button>`;
+    card.innerHTML = `<div class="quiz-card-icon">${topic.icon}</div><h3 class="quiz-card-title">${escapeHtml(topic.name)}</h3><p class="quiz-card-desc">Test your knowledge with 10 unique questions</p><div class="quiz-card-meta"><span class="quiz-count">10 Questions</span><span class="quiz-difficulty ${getDifficultyClass(topic.difficulty)}">${escapeHtml(topic.difficulty)}</span></div><div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progress-${topicKey}"></div></div><div class="quiz-stats"><span>Best: <strong id="best-${topicKey}">--</strong></span><span>Attempts: <strong id="attempts-${topicKey}">0</strong></span></div><button class="btn btn-primary start-quiz-btn" data-topic="${escapeHtml(topicKey)}"><i class="fas fa-play"></i> Start Quiz</button>`;
     quizGrid.appendChild(card);
     card.addEventListener("click", () => startQuiz(topicKey));
     const startBtn = card.querySelector(".start-quiz-btn");
@@ -1209,13 +1287,7 @@ function showQuizResults(score, total, percentage, xpEarned, completionTime) {
 function showQuizReview() {
   if (!lastQuizReview || !lastQuizReview.questions || !lastQuizReview.answers) { showNotification("No review data found", "error"); return; }
   const resultEl = document.getElementById("topicQuizResult");
-  const escapeHtml = (value = "") =>
-    String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&`#39`;");
+  const escapeHtml = (value = "") => window.DOMSanitizer.escapeHtml(value);
 
   // Ensure layout doesn't cut off items: keep scrollable container, and avoid nested flex issues.
   let html = `<div class="quiz-review"><h2>📖 Quiz Review</h2><div class="quiz-review-container"><div class="quiz-review-items">`;
@@ -1247,6 +1319,8 @@ function restoreQuizResults() {
 function initPracticeSection() {
   const problemsGrid = document.querySelector(".problems-grid");
   if (!problemsGrid) return;
+  if (problemsGrid.dataset.initialized) return;
+  problemsGrid.dataset.initialized = "true";
 
   // Notes modal
   const notesCloseBtn = document.getElementById("notesModalClose");
@@ -1268,42 +1342,135 @@ function initPracticeSection() {
     });
   });
 
-  // AI Recommend Button
+  // AI Recommend Button variables for debouncing & aborting
+  let aiRecommendDebounceTimer = null;
+  let aiRecommendAbortController = null;
+  let recommendationRequestCounter = 0;
+
   const aiRecommendBtn = document.getElementById("ai-recommend-btn");
-  if (aiRecommendBtn) {
-    aiRecommendBtn.addEventListener("click", async () => {
-      try {
+  const aiRecommendStatus = document.getElementById("ai-recommend-status");
+  const aiRecommendStatusMsg = document.getElementById("ai-recommend-status-msg");
+  const aiRecommendDisableToggle = document.getElementById("ai-recommend-disable-toggle");
+  const aiRecommendDebounceInput = document.getElementById("ai-recommend-debounce-input");
+
+  function updateRecommendationStatus(text, type, requestId) {
+    // Only update if this request matches the latest request counter
+    if (requestId !== undefined && requestId !== recommendationRequestCounter) return;
+
+    if (aiRecommendStatusMsg) {
+      aiRecommendStatusMsg.textContent = text;
+      aiRecommendStatusMsg.style.opacity = text ? "1" : "0";
+      
+      if (type === "cancelled") {
+        aiRecommendStatusMsg.style.color = "#ff9800"; // Orange
+      } else if (type === "success") {
+        aiRecommendStatusMsg.style.color = "#4caf50"; // Green
+      } else if (type === "loading") {
+        aiRecommendStatusMsg.style.color = "#3b82f6"; // Blue
+      } else if (type === "waiting") {
+        aiRecommendStatusMsg.style.color = "#a1a1aa"; // Grey
+      } else {
+        aiRecommendStatusMsg.style.color = "";
+      }
+    }
+    
+    if (aiRecommendStatus) {
+      aiRecommendStatus.textContent = text;
+    }
+  }
+
+  async function startRecommendationRequest(requestId, disableOnFetch) {
+    aiRecommendAbortController = new AbortController();
+    const signal = aiRecommendAbortController.signal;
+
+    try {
+      if (aiRecommendBtn) {
         aiRecommendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finding...';
-        aiRecommendBtn.disabled = true;
-        
-        const res = await fetch("/api/recommendations/next");
-        if (res.status === 401) {
-           alert("Please log in to get AI recommendations.");
-           return;
+        if (disableOnFetch) {
+          aiRecommendBtn.disabled = true;
         }
-        const data = await res.json();
-        
-        if (data.success && data.recommendation) {
-           const rec = data.recommendation;
-           currentFilter = rec.topic.toLowerCase();
-           currentPage = 1;
-           
-           filterButtons.forEach((b) => {
-             if(b.dataset.filter === currentFilter) b.classList.add("active");
-             else b.classList.remove("active");
-           });
-           
-           renderProblems();
-           alert("AI Recommendation: " + rec.reason + "\n\n" + (rec.aiTip || ""));
-        } else {
-           alert("Could not get recommendation.");
-        }
-      } catch (err) {
-         console.error("AI recommend error:", err);
-         alert("Failed to fetch recommendation.");
-      } finally {
-         aiRecommendBtn.innerHTML = '<i class="fas fa-magic"></i> AI Recommend Next';
-         aiRecommendBtn.disabled = false;
+      }
+      updateRecommendationStatus("Finding...", "loading", requestId);
+
+      const res = await fetch("/api/recommendations/next", { signal });
+      if (res.status === 401) {
+         alert("Please log in to get AI recommendations.");
+         updateRecommendationStatus("Authentication required", "cancelled", requestId);
+         return;
+      }
+      const data = await res.json();
+      
+      if (data.success && data.recommendation) {
+         const rec = data.recommendation;
+         currentFilter = rec.topic.toLowerCase();
+         currentPage = 1;
+         
+         filterButtons.forEach((b) => {
+           if(b.dataset.filter === currentFilter) b.classList.add("active");
+           else b.classList.remove("active");
+         });
+         
+         renderProblems();
+         updateRecommendationStatus("New result", "success", requestId);
+         alert("AI Recommendation: " + rec.reason + "\n\n" + (rec.aiTip || ""));
+      } else {
+         alert("Could not get recommendation.");
+         updateRecommendationStatus("Failed", "cancelled", requestId);
+      }
+    } catch (err) {
+       if (err.name === 'AbortError') {
+          console.log("AI recommend request was cancelled.");
+          // Update status if it's the latest request
+          updateRecommendationStatus("Request cancelled", "cancelled", requestId);
+       } else {
+          console.error("AI recommend error:", err);
+          alert("Failed to fetch recommendation.");
+          updateRecommendationStatus("Failed", "cancelled", requestId);
+       }
+    } finally {
+       // Only clean up UI/state if this is the active request
+       if (requestId === recommendationRequestCounter) {
+         aiRecommendAbortController = null;
+         if (aiRecommendBtn) {
+           aiRecommendBtn.innerHTML = '<i class="fas fa-magic"></i> AI Recommend Next';
+           aiRecommendBtn.disabled = false;
+         }
+       }
+    }
+  }
+
+  if (aiRecommendBtn) {
+    aiRecommendBtn.addEventListener("click", () => {
+      const disableOnFetch = aiRecommendDisableToggle ? aiRecommendDisableToggle.checked : false;
+      const debounceDelayVal = aiRecommendDebounceInput ? parseInt(aiRecommendDebounceInput.value, 10) : 500;
+      const debounceDelay = isNaN(debounceDelayVal) ? 500 : debounceDelayVal;
+
+      // Increment request counter
+      recommendationRequestCounter++;
+      const currentRequestId = recommendationRequestCounter;
+
+      // Clear any pending debounce timer
+      if (aiRecommendDebounceTimer) {
+        clearTimeout(aiRecommendDebounceTimer);
+        aiRecommendDebounceTimer = null;
+      }
+
+      // Abort active request if any
+      if (aiRecommendAbortController) {
+        aiRecommendAbortController.abort();
+        aiRecommendAbortController = null;
+        // Immediate status update to cancelled
+        updateRecommendationStatus("Request cancelled", "cancelled", currentRequestId);
+      }
+
+      if (debounceDelay === 0) {
+        startRecommendationRequest(currentRequestId, disableOnFetch);
+      } else {
+        updateRecommendationStatus("Waiting...", "waiting", currentRequestId);
+        aiRecommendDebounceTimer = setTimeout(() => {
+          aiRecommendDebounceTimer = null;
+          startRecommendationRequest(currentRequestId, disableOnFetch);
+        }, debounceDelay);
       }
     });
   }
@@ -1390,6 +1557,8 @@ function renderProblems() {
   updatePaginationControls(currentPage, totalPages);
 }
 
+const problemCardHtmlCache = new Map();
+
 function renderProblemCards(problems) {
   const problemsGrid = document.querySelector(".problems-grid");
   if (!problemsGrid) return;
@@ -1397,6 +1566,16 @@ function renderProblemCards(problems) {
   const cpType = userProgress.codingPersonality ? userProgress.codingPersonality.type : "brute-force first";
 
   const html = problems.map(problem => {
+    const isCompleted = userProgress.completedProblems.includes(problem.id);
+    const isFavorite = userProgress.favoriteProblems.includes(problem.id);
+    const hasNotes = userProgress.problemNotes && !!userProgress.problemNotes[problem.id];
+    
+    const cacheKey = `${problem.id}_${isCompleted}_${isFavorite}_${hasNotes}_${cpType}_${problem.highlightedTitle || ''}_${problem.highlightedDescription || ''}`;
+    
+    if (problemCardHtmlCache.has(cacheKey)) {
+      return problemCardHtmlCache.get(cacheKey);
+    }
+
     let isRec = false, recLabel = "";
     if (cpType === "brute-force first") {
       if (problem.difficulty === "easy" || problem.tags.includes("Arrays")) { isRec = true; recLabel = "Plan First!"; }
@@ -1408,14 +1587,14 @@ function renderProblemCards(problems) {
       if (problem.tags.includes("Greedy") || problem.tags.includes("Divide and Conquer") || problem.tags.includes("Recursion")) { isRec = true; recLabel = "Heuristic Check"; }
     }
     const recBadge = isRec ? `<span class="rec-personality-badge"><i class="fas fa-brain"></i> ${recLabel}</span>` : "";
-    const isCompleted = userProgress.completedProblems.includes(problem.id);
-    const isFavorite = userProgress.favoriteProblems.includes(problem.id);
-    const hasNotes = userProgress.problemNotes && userProgress.problemNotes[problem.id];
 
     const displayTitle = problem.highlightedTitle || problem.title;
     const snippetHtml = problem.highlightedDescription ? `<div class="problem-snippet" style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${problem.highlightedDescription}</div>` : "";
 
-    return `<div class="problem-card animate-in" data-id="${problem.id}"><div class="problem-header"><h3 class="problem-title">${recBadge}${displayTitle}</h3><div class="problem-actions"><button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${problem.id}" aria-label="Favorite problem"><i class="fas fa-heart"></i></button><button class="notes-btn ${hasNotes ? 'has-notes' : ''}" data-id="${problem.id}" aria-label="Problem notes"><i class="fas fa-sticky-note"></i></button><span class="difficulty-badge ${problem.difficulty}">${problem.difficulty}</span></div></div>${snippetHtml}<div class="problem-tags">${problem.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div><div class="problem-meta"><span class="acceptance-rate"><i class="fas fa-users"></i> ${problem.acceptance} acceptance</span>${isCompleted ? '<span class="completed-badge"><i class="fas fa-check"></i> Completed</span>' : ''}</div></div>`;
+    const cardHtml = `<div class="problem-card animate-in" data-id="${problem.id}"><div class="problem-header"><h3 class="problem-title">${recBadge}${displayTitle}</h3><div class="problem-actions"><button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${problem.id}" aria-label="Favorite problem"><i class="fas fa-heart"></i></button><button class="notes-btn ${hasNotes ? 'has-notes' : ''}" data-id="${problem.id}" aria-label="Problem notes"><i class="fas fa-sticky-note"></i></button><span class="difficulty-badge ${problem.difficulty}">${problem.difficulty}</span></div></div>${snippetHtml}<div class="problem-tags">${problem.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div><div class="problem-meta"><span class="acceptance-rate"><i class="fas fa-users"></i> ${problem.acceptance} acceptance</span>${isCompleted ? '<span class="completed-badge"><i class="fas fa-check"></i> Completed</span>' : ''}</div></div>`;
+    
+    problemCardHtmlCache.set(cacheKey, cardHtml);
+    return cardHtml;
   }).join("");
 
   problemsGrid.innerHTML = html;
@@ -1437,7 +1616,12 @@ function attachProblemGridEventDelegation(grid) {
       e.preventDefault();
       const problemId = parseInt(favoriteBtn.dataset.id);
       toggleFavorite(problemId);
-      renderProblems();
+      if (currentFilter === 'favorites') {
+        renderProblems();
+      } else {
+        const isFavorite = userProgress.favoriteProblems.includes(problemId);
+        favoriteBtn.classList.toggle('active', isFavorite);
+      }
       return;
     }
 
@@ -1553,6 +1737,11 @@ function saveProblemNotes() {
     userProgress.problemNotes[currentNotesProblemId] = note;
     saveUserData();
     showNotification("Notes saved successfully 📝", "success");
+    // Direct DOM diff update for the notes icon on the problem card
+    const notesBtn = document.querySelector(`.problems-grid .notes-btn[data-id="${currentNotesProblemId}"]`);
+    if (notesBtn) {
+      notesBtn.classList.toggle("has-notes", !!note);
+    }
   }
   closeNotesModal();
 }
@@ -1779,12 +1968,12 @@ function openRoadmapStepModal(stepIndex, type = 'basic') {
   const titleEl = document.getElementById("roadmapStepModalTitle");
   if (titleEl) titleEl.textContent = step.title;
   const theoryEl = document.getElementById("roadmapStepTheoryContent");
-  if (theoryEl) theoryEl.innerHTML = step.theory;
+  if (theoryEl) theoryEl.innerHTML = window.DOMSanitizer.sanitizeHTML(step.theory);
   const complexitySection = document.getElementById("roadmapStepComplexitySection");
   if (step.complexity && step.complexity.length > 0 && complexitySection) {
     complexitySection.classList.remove("hidden");
     const body = document.getElementById("roadmapStepComplexityBody");
-    if (body) body.innerHTML = step.complexity.map(item => `<tr><td>${item.op}</td><td>${item.time}</td><td>${item.space}</td></tr>`).join("");
+    if (body) body.innerHTML = step.complexity.map(item => `<tr><td>${escapeHtml(item.op)}</td><td>${escapeHtml(item.time)}</td><td>${escapeHtml(item.space)}</td></tr>`).join("");
   } else if (complexitySection) complexitySection.classList.add("hidden");
   const quizSection = document.getElementById("roadmapStepQuizSection");
   const problemsSection = document.getElementById("roadmapStepProblemsSection");
@@ -1793,7 +1982,7 @@ function openRoadmapStepModal(stepIndex, type = 'basic') {
     problemsSection.classList.add("hidden");
     const quizContent = document.getElementById("roadmapStepQuizContent");
     const isCompleted = userProgress.completedRoadmapSteps.includes(step.id);
-    if (quizContent) quizContent.innerHTML = step.quiz.map((q, qIndex) => `<div class="quiz-question-container" data-qindex="${qIndex}"><div class="quiz-question-text">${qIndex + 1}. ${q.question}</div><ul class="quiz-options-list">${q.options.map((opt, oIndex) => `<li class="quiz-option-item" ${isCompleted && oIndex === q.correct ? 'class="quiz-option-item correct"' : ''} ${isCompleted ? 'style="pointer-events:none; cursor:default;"' : ''} data-oindex="${oIndex}" onclick="${isCompleted ? '' : `selectQuizOption(${step.id}, ${qIndex}, ${oIndex}, this)`}">${opt}</li>`).join("")}</ul><div class="quiz-feedback ${isCompleted ? 'correct' : 'hidden'}">${isCompleted ? `Correct! ${q.explanation}` : ''}</div></div>`).join("");
+    if (quizContent) quizContent.innerHTML = step.quiz.map((q, qIndex) => `<div class="quiz-question-container" data-qindex="${qIndex}"><div class="quiz-question-text">${qIndex + 1}. ${escapeHtml(q.question)}</div><ul class="quiz-options-list">${q.options.map((opt, oIndex) => `<li class="quiz-option-item" ${isCompleted && oIndex === q.correct ? 'class="quiz-option-item correct"' : ''} ${isCompleted ? 'style="pointer-events:none; cursor:default;"' : ''} data-oindex="${oIndex}" onclick="${isCompleted ? '' : `selectQuizOption(${step.id}, ${qIndex}, ${oIndex}, this)`}">${escapeHtml(opt)}</li>`).join("")}</ul><div class="quiz-feedback ${isCompleted ? 'correct' : 'hidden'}">${isCompleted ? `Correct! ${escapeHtml(q.explanation)}` : ''}</div></div>`).join("");
     const submitBtn = document.getElementById("roadmapStepSubmitQuizBtn");
     if (submitBtn) {
       if (isCompleted) submitBtn.style.display = "none";
@@ -1807,7 +1996,7 @@ function openRoadmapStepModal(stepIndex, type = 'basic') {
       const prob = practiceProblems.find(p => p.id === pid);
       if (!prob) return "";
       const isSolved = userProgress.completedProblems.includes(pid);
-      return `<li class="roadmap-problem-item"><div class="roadmap-problem-info"><span class="roadmap-problem-title">${prob.title}</span><div class="roadmap-problem-meta"><span class="difficulty-badge ${getDifficultyClass(prob.difficulty)}">${prob.difficulty}</span><span>Acceptance: ${prob.acceptance}</span></div></div><div class="roadmap-problem-action">${isSolved ? `<span class="roadmap-problem-status completed"><i class="fas fa-check-circle"></i> Solved</span>` : `<button class="btn btn-outline btn-sm" onclick="openCodingProblem(${pid})"><i class="fas fa-play"></i> Solve</button>`}</div></li>`;
+      return `<li class="roadmap-problem-item"><div class="roadmap-problem-info"><span class="roadmap-problem-title">${escapeHtml(prob.title)}</span><div class="roadmap-problem-meta"><span class="difficulty-badge ${getDifficultyClass(prob.difficulty)}">${escapeHtml(prob.difficulty)}</span><span>Acceptance: ${escapeHtml(prob.acceptance)}</span></div></div><div class="roadmap-problem-action">${isSolved ? `<span class="roadmap-problem-status completed"><i class="fas fa-check-circle"></i> Solved</span>` : `<button class="btn btn-outline btn-sm" onclick="openCodingProblem(${pid})"><i class="fas fa-play"></i> Solve</button>`}</div></li>`;
     }).join("");
   }
   modal.classList.add("active");
@@ -1901,38 +2090,58 @@ function updateCurrentDate() {
   if (dateEl) dateEl.textContent = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 }
 
+let lastActivityListKey = "";
 function updateActivityList() {
   const activityList = document.getElementById("activityList");
   if (!activityList) return;
-  if (userProgress.completedProblems.length === 0) { activityList.innerHTML = '<p class="empty-state">No recent activity. Start solving problems!</p>'; return; }
+  const currentKey = userProgress.completedProblems.slice(-5).join(",");
+  if (lastActivityListKey === currentKey && activityList.innerHTML !== "") return;
+
+  if (userProgress.completedProblems.length === 0) { activityList.innerHTML = '<p class="empty-state">No recent activity. Start solving problems!</p>'; lastActivityListKey = currentKey; return; }
   const activities = userProgress.completedProblems.slice(-5).map(pid => { const problem = practiceProblems.find(p => p.id === pid); return { problem: problem ? problem.title : "Unknown", time: "Today" }; });
   activityList.innerHTML = activities.map(activity => `<div class="activity-item"><div class="activity-type"><span class="activity-icon"><i class="fas fa-code"></i></span><span>Solved: ${activity.problem}</span></div><span class="activity-time">${activity.time}</span></div>`).join("");
+  lastActivityListKey = currentKey;
 }
 
+let lastRecentProblemsKey = "";
 function updateRecentProblems() {
   const container = document.getElementById("recentProblemsList");
   if (!container) return;
-  if (!userProgress.recentProblems || userProgress.recentProblems.length === 0) { container.innerHTML = "<p>No recently viewed problems</p>"; return; }
+  const currentKey = (userProgress.recentProblems || []).join(",");
+  if (lastRecentProblemsKey === currentKey && container.innerHTML !== "") return;
+
+  if (!userProgress.recentProblems || userProgress.recentProblems.length === 0) { container.innerHTML = "<p>No recently viewed problems</p>"; lastRecentProblemsKey = currentKey; return; }
   container.innerHTML = userProgress.recentProblems.map(id => { const problem = practiceProblems.find(p => p.id === id); return problem ? `<div class="recent-problem" data-id="${problem.id}">${problem.title}</div>` : ""; }).join("");
   container.querySelectorAll(".recent-problem").forEach(item => { item.addEventListener("click", () => { const problemId = parseInt(item.dataset.id); const problem = practiceProblems.find(p => p.id === problemId); if (problem) openQuizEditor(problem); }); });
+  lastRecentProblemsKey = currentKey;
 }
 
+let lastFreezeHistoryKey = "";
 function updateFreezeHistoryList() {
   const freezeHistoryList = document.getElementById("freezeHistoryList");
   if (!freezeHistoryList) return;
   const history = userProgress.freezeHistory || [];
-  if (history.length === 0) { freezeHistoryList.innerHTML = '<p class="empty-state">No freezes used yet.</p>'; return; }
+  const currentKey = history.slice(-5).map(h => `${h.reason}_${h.date}`).join(",");
+  if (lastFreezeHistoryKey === currentKey && freezeHistoryList.innerHTML !== "") return;
+
+  if (history.length === 0) { freezeHistoryList.innerHTML = '<p class="empty-state">No freezes used yet.</p>'; lastFreezeHistoryKey = currentKey; return; }
   freezeHistoryList.innerHTML = history.slice(-5).reverse().map(h => `<div class="activity-item"><div class="activity-type"><span class="activity-icon"><i class="fas fa-snowflake" style="color:#00d2ff;"></i></span><span>${h.reason}</span></div><span class="activity-time">${new Date(h.date).toLocaleDateString()}</span></div>`).join("");
+  lastFreezeHistoryKey = currentKey;
 }
 
+let lastBadgesKey = "";
 function updateBadges() {
   const container = document.getElementById("badgesContainer");
   const grid = document.getElementById("badgesGrid");
+  const currentKey = `${userProgress.completedProblems.length}_${userProgress.streak}_${userProgress.xp}`;
+  if (lastBadgesKey === currentKey && container && container.innerHTML !== "" && (!grid || grid.innerHTML !== "")) return;
+
   const badges = [{ id: 1, icon: "🌟", name: "First Steps", description: "Begin your journey", criteria: "Solve 1 problem", earned: userProgress.completedProblems.length >= 1 }, { id: 2, icon: "🔥", name: "On Fire", description: "Keep the momentum going", criteria: "Maintain a 7-day streak", earned: userProgress.streak >= 7 }, { id: 3, icon: "💎", name: "Diamond", description: "Reach a major XP milestone", criteria: "Earn 5,000 XP", earned: userProgress.xp >= 5000 }, { id: 4, icon: "🚀", name: "Rocket", description: "Speed through problems", criteria: "Solve 50 problems", earned: userProgress.completedProblems.length >= 50 }, { id: 5, icon: "👑", name: "Master", description: "Achieve expert problem-solving", criteria: "Solve 100 problems", earned: userProgress.completedProblems.length >= 100 }, { id: 6, icon: "🎯", name: "Sharpshooter", description: "Hit the target with consistency", criteria: "Solve 25 problems and earn 2,500 XP", earned: userProgress.completedProblems.length >= 25 && userProgress.xp >= 2500 }];
   const earned = badges.filter(b => b.earned).map(b => b.id);
   if (JSON.stringify(earned) !== JSON.stringify(userProgress.badges)) { userProgress.badges = earned; saveUserData(); }
   if (container) container.innerHTML = badges.map(badge => `<div class="badge ${badge.earned ? '' : 'locked'}" tabindex="0"><span class="badge-tooltip"><strong>${badge.name}</strong><span>${badge.description}</span><span>${badge.criteria}</span></span>${badge.icon}</div>`).join("");
   if (grid) grid.innerHTML = badges.map(badge => `<div class="badge-lg ${badge.earned ? '' : 'locked'}" tabindex="0"><span class="badge-tooltip"><strong>${badge.name}</strong><span>${badge.description}</span><span>${badge.criteria}</span></span>${badge.icon}</div>`).join("");
+  lastBadgesKey = currentKey;
 }
 
 // ============================================
@@ -2291,11 +2500,18 @@ function parseDateKey(key) { const [y, m, d] = key.split("-").map(Number); retur
 
 function getActivityLevel(count) { if (!count || count === 0) return 0; if (count === 1) return 1; if (count === 2) return 2; if (count <= 4) return 3; return 4; }
 
+let lastRenderedHeatmapDataKey = "";
 function renderActivityHeatmap() {
   const container = document.getElementById("activityHeatmap");
   if (!container) return;
   const activityData = userProgress.activityData || {};
   const today = new Date();
+  const todayKey = today.toLocaleDateString("en-US");
+  const currentDataKey = `${JSON.stringify(activityData)}_${todayKey}`;
+  if (lastRenderedHeatmapDataKey === currentDataKey && container.innerHTML !== "") {
+    return;
+  }
+  
   today.setHours(23, 59, 59, 999);
   const WEEKS_TO_SHOW = 52;
   const dayOfWeek = today.getDay();
@@ -2340,6 +2556,7 @@ function renderActivityHeatmap() {
   html += "</div>";
   container.innerHTML = html;
   attachHeatmapTooltips();
+  lastRenderedHeatmapDataKey = currentDataKey;
 }
 
 function attachHeatmapTooltips() {
@@ -2425,11 +2642,11 @@ function openQuizEditor(problem) {
     if (problem.description) {
       let descHTML = problem.description;
       if (problem.constraints) descHTML += "<br><br><strong>Constraints:</strong><br>" + problem.constraints.map(c => `• ${c}`).join("<br>");
-      descEl.innerHTML = descHTML;
+      descEl.innerHTML = window.DOMSanitizer.sanitizeHTML(descHTML);
     } else descEl.textContent = `Solve the "${problem.title}" problem.`;
   }
   const quizExamples = document.getElementById("quizExamples");
-  if (quizExamples) quizExamples.innerHTML = generateExamples(problem);
+  if (quizExamples) quizExamples.innerHTML = window.DOMSanitizer.sanitizeHTML(generateExamples(problem));
   renderTestCases(generateTestCases(problem));
   const editor = document.getElementById("codeEditor");
   const langSelect = document.getElementById("languageSelect");
@@ -2604,8 +2821,8 @@ function renderTestCases(testCases, results) {
       const statusClass = passed ? 'passed' : 'failed';
       const icon = passed ? '✓' : '✗';
       const label = passed ? 'PASS' : 'FAIL';
-      const actualStr = r.actual !== undefined && r.actual !== null ? JSON.stringify(r.actual) : '';
-      const errorStr = r.error || '';
+      const actualStr = r.actual !== undefined && r.actual !== null ? escapeHtml(JSON.stringify(r.actual)) : '';
+      const errorStr = escapeHtml(r.error || '');
       return `<div class="test-case ${r.ran ? statusClass : ''}">
         <div class="test-case-header">
           <span class="test-case-name">Test ${i + 1}</span>
@@ -2614,8 +2831,8 @@ function renderTestCases(testCases, results) {
           </span>
         </div>
         <div class="test-case-details">
-          <div class="test-case-input">Input: <code>${Array.isArray(tc.input) ? tc.input.map(v => JSON.stringify(v)).join(', ') : JSON.stringify(tc.input)}</code></div>
-          <div class="test-case-expected">Expected: <code>${JSON.stringify(tc.expected)}</code></div>
+          <div class="test-case-input">Input: <code>${Array.isArray(tc.input) ? tc.input.map(v => escapeHtml(JSON.stringify(v))).join(', ') : escapeHtml(JSON.stringify(tc.input))}</code></div>
+          <div class="test-case-expected">Expected: <code>${escapeHtml(JSON.stringify(tc.expected))}</code></div>
           ${r.ran && (passed !== undefined) ? `<div class="test-case-actual">Actual: <code>${actualStr || errorStr}</code></div>` : ''}
         </div>
       </div>`;
@@ -2628,8 +2845,8 @@ function renderTestCases(testCases, results) {
           <span class="test-case-result pending">⏳ Pending</span>
         </div>
         <div class="test-case-details">
-          <div class="test-case-input">Input: <code>${Array.isArray(tc.input) ? tc.input.map(v => JSON.stringify(v)).join(', ') : JSON.stringify(tc.input)}</code></div>
-          <div class="test-case-expected">Expected: <code>${JSON.stringify(tc.expected)}</code></div>
+          <div class="test-case-input">Input: <code>${Array.isArray(tc.input) ? tc.input.map(v => escapeHtml(JSON.stringify(v))).join(', ') : escapeHtml(JSON.stringify(tc.input))}</code></div>
+          <div class="test-case-expected">Expected: <code>${escapeHtml(JSON.stringify(tc.expected))}</code></div>
         </div>
       </div>
     `).join("");
@@ -3853,6 +4070,7 @@ function showNextFact() {
 function showDailyFact() {
     const factText = document.getElementById('factText');
     const factDate = document.getElementById('factDate');
+    if (!factText || !factDate) return;
     
     factText.textContent = getDailyFact();
     const today = new Date().toLocaleDateString();
