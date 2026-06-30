@@ -743,10 +743,18 @@ async function handleApi(req, res, pathname) {
       try {
         await fs.writeFile(tmpFile, instrumented, "utf8");
         await new Promise((resolve, reject) => {
-          execFile("node", [tmpFile], {
+          // Sandbox the user-submitted code: instrumentJS does NOT isolate it,
+          // so run it under Node's Permission Model (--permission denies fs,
+          // child_process, worker_threads and native addons) with an empty
+          // environment so the child cannot read server secrets (SESSION_SECRET,
+          // Firebase keys, etc.). process.execPath is used directly so the
+          // binary resolves without a PATH in the stripped env. This blocks the
+          // RCE / secret-exfiltration path while still allowing console output
+          // and the snapshot JSON written to stdout.
+          execFile(process.execPath, ["--permission", tmpFile], {
             timeout: 10000,
             maxBuffer: 1024 * 1024,
-            env: { ...process.env, NODE_OPTIONS: "" },
+            env: {},
           }, (err, stdout, stderr) => {
             if (stdout) {
               try {
@@ -2362,7 +2370,13 @@ if (pathname === "/api/forgot-password" && req.method === "POST") {
     try { payload = await readJsonBody(req); } catch { return sendJson(res, 400, { error: "Invalid JSON." }); }
 
     const existing = payload.existing || { repetitions: 0, easeFactor: 2.5, interval: 0 };
-    const quality = parseInt(payload.quality) !== undefined ? parseInt(payload.quality) : 3;
+    // parseInt() returns NaN (never undefined) for missing/non-numeric input,
+    // so guard with Number.isInteger and fall back to the SM-2 default of 3,
+    // clamped to the valid quality range (0-5) — otherwise applySM2 persists NaN.
+    const parsedQuality = Number.parseInt(payload.quality, 10);
+    const quality = Number.isInteger(parsedQuality)
+      ? Math.max(0, Math.min(5, parsedQuality))
+      : 3;
     const updated = applySM2(existing, quality);
     updated.problemId = parseInt(problemId) || 0;
 
@@ -2790,9 +2804,12 @@ function resolveStaticPath(pathname) {
 const routes = {
   "/": "index.html",
   "/login": "pages/auth/login.html",
+  "/login.html": "pages/auth/login.html",
   "/profile": "pages/profile/public-profile.html",
   "/signup": "pages/auth/signup.html",
+  "/signup.html": "pages/auth/signup.html",
   "/verify-email": "pages/auth/verify-email.html",
+  "/verify-email.html": "pages/auth/verify-email.html",
     "/community": "community.html",
     "/python-learning": "python-learning.html",
     "/javascript-learning": "javascript-learning.html",
@@ -2961,7 +2978,10 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
-const server = http.createServer(async (req, res) => {
+// The core HTTP request handler. Exported as `requestHandler` so the Vercel
+// catch-all serverless entry (api/[...path].js) can delegate every server-only
+// /api/* route to it, and used directly to back the `server` instance below.
+async function requestHandler(req, res) {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     const pathname = normalizePathname(decodeURIComponent(url.pathname));
@@ -2993,7 +3013,9 @@ const server = http.createServer(async (req, res) => {
     console.error(error);
     sendJson(res, 500, { error: "Something went wrong." });
   }
-});
+}
+
+const server = http.createServer(requestHandler);
 
 // ===== CODE ANALYSIS ENGINE =====
 // Used by the POST /api/predict-acceptance route in handleApi().
@@ -3437,7 +3459,7 @@ socket.on('voice-ice', ({ roomId, candidate, to, from }) => {
 });
 // -----------------------------------------
 
-export { server, hashPassword, passwordMatches, applySM2, validateSignup, updateMemoryStore, readMemoryStore };
+export { server, requestHandler, hashPassword, passwordMatches, applySM2, validateSignup, updateMemoryStore, readMemoryStore };
 if (process.env.VERCEL === "1") {
   db = initializeFirebase();
   useFirestore = !!db;
