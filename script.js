@@ -958,6 +958,125 @@ function updateLevelProgress() {
 }
 
 // ============================================
+// BACK TO TOP BUTTON
+// ============================================
+
+/**
+ * Initialize Back to Top button functionality
+ */
+function initBackToTop() {
+    const backToTopBtn = document.getElementById('backToTop');
+    if (!backToTopBtn) return;
+
+    let isVisible = false;
+    let scrollTimeout;
+    let progressRing = backToTopBtn.querySelector('.progress-ring-fill');
+
+    /**
+     * Check scroll position and toggle button visibility
+     */
+    function toggleBackToTop() {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const shouldShow = scrollY > 300;
+
+        if (shouldShow && !isVisible) {
+            backToTopBtn.classList.add('visible');
+            isVisible = true;
+            updateProgressRing(scrollY);
+        } else if (!shouldShow && isVisible) {
+            backToTopBtn.classList.remove('visible');
+            isVisible = false;
+        } else if (shouldShow && isVisible) {
+            updateProgressRing(scrollY);
+        }
+    }
+
+    /**
+     * Update progress ring (optional enhancement)
+     */
+    function updateProgressRing(scrollY) {
+        if (!progressRing) {
+            progressRing = backToTopBtn.querySelector('.progress-ring-fill');
+            if (!progressRing) return;
+        }
+
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? (scrollY / maxScroll) * 100 : 0;
+        const circumference = 2 * Math.PI * 20;
+        const offset = circumference - (progress / 100) * circumference;
+        
+        progressRing.style.strokeDasharray = circumference;
+        progressRing.style.strokeDashoffset = offset;
+    }
+
+    /**
+     * Scroll to top smoothly
+     */
+    function scrollToTop() {
+        const startY = window.scrollY || window.pageYOffset;
+        const duration = 500;
+        const startTime = performance.now();
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function animateScroll(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeInOutCubic(progress);
+            
+            window.scrollTo(0, startY * (1 - easedProgress));
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+            }
+        }
+
+        requestAnimationFrame(animateScroll);
+        
+        setTimeout(() => {
+            updateProgressRing(0);
+        }, duration + 100);
+    }
+
+    // Throttled scroll listener
+    function throttledScroll() {
+        if (scrollTimeout) {
+            cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(toggleBackToTop);
+    }
+
+    // Event listeners
+    window.addEventListener('scroll', throttledScroll, { passive: true });
+    window.addEventListener('resize', throttledScroll, { passive: true });
+
+    // Click handler
+    backToTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        scrollToTop();
+    });
+
+    // Keyboard support
+    backToTopBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'Space') {
+            e.preventDefault();
+            scrollToTop();
+        }
+    });
+
+    // Touch support for mobile
+    backToTopBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        scrollToTop();
+    }, { passive: false });
+
+    // Initial check
+    toggleBackToTop();
+}
+
+// ============================================
 // TOPICS
 // ============================================
 function getDayOfYear() {
