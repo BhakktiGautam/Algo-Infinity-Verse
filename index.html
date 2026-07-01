@@ -67,10 +67,324 @@
         } catch (e) {}
       })();
     </script>
+
+    <style>
+      /* Search Autocomplete Styles */
+      .search-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .search-bar {
+        display: flex;
+        align-items: center;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0 16px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+      }
+
+      .search-bar:focus-within {
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      }
+
+      .search-bar i {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        transition: color 0.3s ease;
+      }
+
+      .search-bar:focus-within i {
+        color: #7c3aed;
+      }
+
+      .search-bar input {
+        flex: 1;
+        padding: 12px 12px;
+        border: none;
+        background: transparent;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        outline: none;
+        width: 100%;
+      }
+
+      .search-bar input::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+      }
+
+      .clear-search-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .clear-search-btn.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .clear-search-btn:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      .search-suggestions {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        max-height: 320px;
+        overflow-y: auto;
+        display: none;
+        z-index: 1000;
+        padding: 8px 0;
+      }
+
+      .search-suggestions::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .search-suggestions::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+        border-radius: 2px;
+      }
+
+      .search-suggestions::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 2px;
+      }
+
+      .search-suggestions.visible {
+        display: block;
+        animation: suggestionsSlideIn 0.2s ease;
+      }
+
+      @keyframes suggestionsSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .suggestion-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      .suggestion-item:hover,
+      .suggestion-item:focus {
+        background: rgba(124, 58, 237, 0.08);
+      }
+
+      .suggestion-item.active {
+        background: rgba(124, 58, 237, 0.12);
+        border-left: 3px solid #7c3aed;
+      }
+
+      .suggestion-icon {
+        font-size: 1rem;
+        flex-shrink: 0;
+        width: 24px;
+        text-align: center;
+      }
+
+      .suggestion-text {
+        flex: 1;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .suggestion-text .highlight {
+        background-color: #fbbf24;
+        color: #1e293b;
+        padding: 0 2px;
+        border-radius: 2px;
+        font-weight: 600;
+      }
+
+      .suggestion-type {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+
+      .suggestion-type.title {
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+      }
+
+      .suggestion-type.tag {
+        background: rgba(168, 85, 247, 0.15);
+        color: #a855f7;
+      }
+
+      .suggestion-type.topic {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+      }
+
+      .suggestion-type.description {
+        background: rgba(251, 191, 36, 0.15);
+        color: #f59e0b;
+      }
+
+      .suggestion-group-header {
+        padding: 6px 16px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 4px;
+      }
+
+      .suggestion-no-results {
+        padding: 16px;
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .suggestion-no-results i {
+        display: block;
+        font-size: 24px;
+        margin-bottom: 8px;
+        color: var(--border-color);
+      }
+
+      .dark .search-suggestions {
+        background: #1e293b;
+        border-color: #334155;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      .dark .suggestion-item:hover,
+      .dark .suggestion-item:focus {
+        background: rgba(124, 58, 237, 0.15);
+      }
+
+      .dark .suggestion-item.active {
+        background: rgba(124, 58, 237, 0.2);
+      }
+
+      .dark .suggestion-text .highlight {
+        background-color: #f59e0b;
+        color: #0f172a;
+      }
+
+      .dark .suggestion-type.title {
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+      }
+
+      .dark .suggestion-type.tag {
+        background: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+      }
+
+      .dark .suggestion-type.topic {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+      }
+
+      .dark .suggestion-type.description {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fcd34d;
+      }
+
+      .dark .suggestion-group-header {
+        color: #94a3b8;
+        border-color: #334155;
+      }
+
+      @media (max-width: 768px) {
+        .search-wrapper {
+          min-width: 150px;
+        }
+        
+        .search-bar input {
+          font-size: 0.85rem;
+          padding: 10px 10px;
+        }
+        
+        .search-suggestions {
+          max-height: 260px;
+          border-radius: 10px;
+        }
+        
+        .suggestion-item {
+          padding: 8px 14px;
+          font-size: 0.85rem;
+        }
+        
+        .suggestion-icon {
+          font-size: 0.85rem;
+          width: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .search-wrapper {
+          min-width: 120px;
+          width: 100%;
+        }
+        
+        .search-suggestions {
+          max-height: 220px;
+          margin-top: 2px;
+        }
+        
+        .suggestion-item {
+          padding: 6px 12px;
+          font-size: 0.8rem;
+          gap: 8px;
+        }
+        
+        .suggestion-type {
+          font-size: 0.55rem;
+          padding: 1px 6px;
+        }
+      }
+    </style>
 </head>
+  
   <body data-page="index">
-    <!-- Skip to main content (accessibility) -->
-    <a href="#main" class="skip-link">Skip to content</a>
+    
 
     <!-- Offline Status Banner -->
     <div id="offline-banner" class="offline-banner hidden" aria-live="polite">
@@ -96,6 +410,20 @@
     <!-- Scroll to Top Button -->
     <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
       <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <!-- Back to Top Button -->
+    <button 
+        id="backToTop" 
+        class="back-to-top" 
+        aria-label="Back to top"
+        title="Scroll back to top"
+    >
+        <svg class="progress-ring" viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="progress-ring-bg" cx="22" cy="22" r="20"/>
+            <circle class="progress-ring-fill" cx="22" cy="22" r="20"/>
+        </svg>
+        <i class="fas fa-arrow-up"></i>
     </button>
 
     <!-- Navigation Bar (loaded from partial) -->
@@ -198,21 +526,38 @@
           Practice Problems
         </h2>
         <div class="practice-controls">
-          <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search problems..."
-            />
-            <button
-              id="clearSearchBtn"
-              class="clear-search-btn"
-              aria-label="Clear search"
-            >
-              &times;
-            </button>
+          <!-- UPDATED: Search with Autocomplete -->
+          <div class="search-wrapper">
+            <div class="search-bar">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search problems by name, topic, or tag..."
+                autocomplete="off"
+                aria-label="Search problems"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="searchSuggestions"
+                aria-activedescendant=""
+              />
+              <button
+                id="clearSearchBtn"
+                type="button"
+                class="clear-search-btn"
+                aria-label="Clear search"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            
+            <!-- Autocomplete Suggestions -->
+            <div id="searchSuggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions">
+              <!-- Suggestions will be rendered here -->
+            </div>
           </div>
+          
           <div class="filter-buttons">
             <button class="filter-btn active" data-filter="all">All</button>
             <button class="filter-btn" data-filter="easy">Easy</button>
@@ -224,10 +569,21 @@
             </button>
           </div>
         </div>
+
+        
+
+
+        <!-- UPDATED: Problem Counter Container -->
+
         <div class="problem-counter-container" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-          <div>
-            Showing <span id="visible-count">0</span> of
-            <span id="total-count">0</span> Problems
+          <div class="problem-stats">
+            <span class="problem-count-display">
+              Showing <strong id="visible-count">0</strong> 
+              <span id="problem-label">problems</span>
+              <span class="total-count-display">
+                (Total: <span id="total-count">0</span>)
+              </span>
+            </span>
           </div>
           <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <!-- Debounce and abort options -->
@@ -250,7 +606,19 @@
           </div>
           <p id="ai-recommend-status" class="sr-only" aria-live="polite"></p>
         </div>
+
+        <!-- Problems Grid -->
         <div class="problems-grid"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+            <i class="fas fa-search"></i>
+            <h3>No problems found</h3>
+            <p>Try adjusting your filters or search terms</p>
+            <button class="btn btn-secondary" id="clearFiltersBtn">
+                <i class="fas fa-undo"></i> Clear Filters
+            </button>
+        </div>
 
         <!-- Pagination Controls -->
          <div class="pagination-controls" id="paginationControls">
@@ -264,6 +632,7 @@
            </div>
       </div>
     </section>
+    
     <!-- DSA Flashcards Revision Section -->
     <section id="flashcards" class="section flashcards-section">
       <div class="container">
@@ -857,14 +1226,28 @@
               </div>
             </div>
           </div>
-          <div class="dashboard-card">
-            <h3>Recent Activity</h3>
-            <div class="activity-list" id="activityList">
-              <p class="empty-state">
-                No recent activity. Start solving problems!
-              </p>
+          
+          <!-- Recent Activity Card -->
+          <div class="dashboard-card activity-feed-card">
+            <div class="card-header-with-actions">
+              <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+              <button id="clearActivityBtn" class="btn-clear-activity" title="Clear all activity">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+            <div class="activity-feed" id="activityFeed">
+              <!-- Activities will be rendered here -->
+              <div class="activity-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No recent activity yet. Start solving problems!</p>
+              </div>
+            </div>
+            <div class="activity-feed-footer">
+              <span id="activityCount">0 activities</span>
+              <button id="viewAllActivityBtn" class="btn-view-all">View All</button>
             </div>
           </div>
+
           <div class="dashboard-card heatmap-card">
             <h3>Activity Heatmap</h3>
             <div class="heatmap-legend">
@@ -1442,9 +1825,16 @@
                   <span aria-label="Submit shortcut: Control plus S"><kbd>Ctrl</kbd>+<kbd>S</kbd><span class="shortcut-label"> Submit</span></span>
                 </div>
                 <div class="output-panel" id="outputPanel">
-                  <div class="output-header" onclick="toggleOutputPanel()">
+                  <button
+                    type="button"
+                    class="output-header"
+                    id="outputHeader"
+                    aria-controls="quizOutputContent"
+                    aria-expanded="true"
+                  >
                     <span>Output</span>
                     <i class="fas fa-chevron-down" id="outputToggleIcon"></i>
+                  </button>
                   </div>
                   <div class="output-content" id="quizOutputContent">
                     <p class="output-placeholder">
@@ -1457,8 +1847,8 @@
           </div>
         </div>
         <div class="quiz-modal-footer">
-          <div class="quiz-actions" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap: 1rem; flex-wrap: wrap;">
-            <div style="display:flex; gap:0.5rem;">
+          <div class="quiz-actions" style="display:flex; justify-content:flex-end; align-items:center; width:100%; gap: 1rem; flex-wrap: wrap;">
+            <div style="display:flex; gap:0.5rem; margin-left: auto;">
               <button class="btn btn-outline" onclick="runQuizCode()">
                 <i class="fas fa-play"></i> Run
               </button>
@@ -1956,7 +2346,7 @@
     <script src="timer.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="utils/searchEngine.js"></script>
-    <script src="modules/domSanitizer.js"></script>
+    <script type="module" src="modules/domSanitizer.js"></script>
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="auth-gate.js"></script>
@@ -1984,11 +2374,29 @@
     </div>
 </div>
 
+<!-- Back to Top Button -->
+<button 
+    id="backToTop" 
+    class="back-to-top" 
+<!-- Back to Top Button -->
+<button 
+    id="backToTop" 
+    class="back-to-top" 
+    aria-label="Back to top"
+    title="Scroll back to top"
+>
+    <svg class="progress-ring" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="20"></circle>
+        <circle class="progress-ring-fill" cx="22" cy="22" r="20"></circle>
+    </svg>
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</button>
 <!-- Footer Shortcut Trigger -->
 <footer>
     <button onclick="openShortcutModal()" style="background:none; border:none; color:#6b7280; cursor:pointer; text-decoration:underline;">
         ⌨️ Keyboard Shortcuts
     </button>
 </footer>
+
   </body>
 </html>
