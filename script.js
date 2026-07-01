@@ -6124,3 +6124,176 @@ function updateProblemCount(filteredProblems) {
     }
 }
 
+// ============================================
+// CLICKABLE PROBLEM TAGS
+// ============================================
+
+/**
+ * Initialize clickable tags on practice problems
+ */
+function initClickableTags() {
+    // Use event delegation for better performance
+    const problemsGrid = document.querySelector('.problems-grid');
+    if (!problemsGrid) return;
+    
+    // Add click listener to the grid container
+    problemsGrid.addEventListener('click', function(e) {
+        // Find if clicked element is a tag or inside a tag
+        const tag = e.target.closest('.tag');
+        if (!tag) return;
+        
+        // Prevent event bubbling
+        e.stopPropagation();
+        
+        // Get tag name
+        const tagName = tag.textContent.trim();
+        if (!tagName) return;
+        
+        // Find search input
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) {
+            // If search input doesn't exist, try to find it in practice section
+            const practiceSection = document.getElementById('practice');
+            if (practiceSection) {
+                const input = practiceSection.querySelector('#searchInput');
+                if (input) {
+                    input.value = tagName;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    // Scroll to practice section
+                    practiceSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            return;
+        }
+        
+        // Set search value and trigger search
+        searchInput.value = tagName;
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // Focus on search input
+        searchInput.focus();
+        
+        // Show notification
+        if (typeof showNotification === 'function') {
+            showNotification(`🔍 Filtering by tag: "${tagName}"`, 'info');
+        }
+        
+        // Log for debugging
+        console.log(`🔍 Filtered by tag: ${tagName}`);
+    });
+    
+    // Also add cursor pointer to all existing tags
+    addTagCursorStyles();
+}
+
+/**
+ * Add cursor pointer to all tags (for static tags)
+ */
+function addTagCursorStyles() {
+    document.querySelectorAll('.tag').forEach(tag => {
+        tag.style.cursor = 'pointer';
+        tag.title = 'Click to filter by this tag';
+        tag.setAttribute('role', 'button');
+        tag.setAttribute('tabindex', '0');
+        tag.setAttribute('aria-label', `Filter by ${tag.textContent.trim()} tag`);
+    });
+}
+
+/**
+ * Add click handler to dynamically created tags
+ * Call this after rendering problems
+ */
+function setupClickableTags() {
+    // Use MutationObserver to watch for new tags
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                // Check if any new tags were added
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        // Check if node itself is a tag or contains tags
+                        if (node.classList && node.classList.contains('tag')) {
+                            styleTag(node);
+                        }
+                        if (node.querySelectorAll) {
+                            node.querySelectorAll('.tag').forEach(styleTag);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    
+    // Start observing the problems grid
+    const problemsGrid = document.querySelector('.problems-grid');
+    if (problemsGrid) {
+        observer.observe(problemsGrid, { childList: true, subtree: true });
+    }
+}
+
+/**
+ * Style a single tag
+ */
+function styleTag(tag) {
+    tag.style.cursor = 'pointer';
+    tag.title = 'Click to filter by this tag';
+    tag.setAttribute('role', 'button');
+    tag.setAttribute('tabindex', '0');
+    const tagName = tag.textContent.trim();
+    tag.setAttribute('aria-label', `Filter by ${tagName} tag`);
+}
+
+// --- KEYBOARD SUPPORT ---
+
+/**
+ * Add keyboard support for tags (Enter/Space to click)
+ */
+function initTagKeyboardSupport() {
+    document.addEventListener('keydown', function(e) {
+        const tag = e.target.closest('.tag');
+        if (!tag) return;
+        
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            tag.click();
+        }
+    });
+}
+
+// --- INITIALIZE ---
+
+/**
+ * Initialize all tag functionality
+ */
+function initTags() {
+    initClickableTags();
+    setupClickableTags();
+    initTagKeyboardSupport();
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for problems to render
+    setTimeout(initTags, 500);
+});
+
+// Also initialize after problems are rendered
+const originalRenderProblems = window.renderProblems || function() {};
+window.renderProblems = function(problems) {
+    // Call original render function
+    originalRenderProblems(problems);
+    
+    // Setup tags on newly rendered problems
+    setTimeout(function() {
+        addTagCursorStyles();
+    }, 100);
+};
+
+// Export functions
+export {
+    initClickableTags,
+    setupClickableTags,
+    styleTag,
+    initTags,
+    addTagCursorStyles
+};

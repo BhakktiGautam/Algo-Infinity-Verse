@@ -287,6 +287,86 @@
         color: var(--border-color);
       }
 
+      /* Tag Clickable Styles */
+      .tag {
+        cursor: pointer;
+        transition: all 0.25s ease;
+        user-select: none;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+      }
+
+      .tag:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      }
+
+      .tag:active {
+        transform: scale(0.95);
+      }
+
+      .tag:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      .tag::after {
+        content: ' 🔍';
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        font-size: 0.6rem;
+      }
+
+      .tag:hover::after {
+        opacity: 1;
+      }
+
+      .dark .tag {
+        background: #1e293b;
+        border-color: #334155;
+        color: #94a3b8;
+      }
+
+      .dark .tag:hover {
+        background: #7c3aed;
+        color: white;
+        border-color: #7c3aed;
+      }
+
+      @media (max-width: 768px) {
+        .tag {
+          padding: 6px 14px;
+          font-size: 0.8rem;
+          min-height: 32px;
+        }
+        .tag::after {
+          content: '';
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .tag {
+          transition: none;
+        }
+        .tag:hover {
+          transform: none;
+        }
+        .tag:active {
+          transform: none;
+        }
+      }
+
       .dark .search-suggestions {
         background: #1e293b;
         border-color: #334155;
@@ -384,7 +464,8 @@
 </head>
   
   <body data-page="index">
-    
+    <!-- Skip link -->
+    <a href="#main" class="skip-link">Skip to content</a>
 
     <!-- Offline Status Banner -->
     <div id="offline-banner" class="offline-banner hidden" aria-live="polite">
@@ -526,7 +607,7 @@
           Practice Problems
         </h2>
         <div class="practice-controls">
-          <!-- UPDATED: Search with Autocomplete -->
+          <!-- Search with Autocomplete -->
           <div class="search-wrapper">
             <div class="search-bar">
               <i class="fas fa-search"></i>
@@ -570,11 +651,7 @@
           </div>
         </div>
 
-        
-
-
-        <!-- UPDATED: Problem Counter Container -->
-
+        <!-- Problem Counter Container -->
         <div class="problem-counter-container" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
           <div class="problem-stats">
             <span class="problem-count-display">
@@ -586,7 +663,6 @@
             </span>
           </div>
           <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <!-- Debounce and abort options -->
             <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.25rem 0.5rem; border-radius: 6px; border: 1px solid var(--glass-border);">
               <label style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem; cursor: pointer; user-select: none;">
                 <input type="checkbox" id="ai-recommend-disable-toggle" style="cursor: pointer; accent-color: var(--primary);">
@@ -607,7 +683,7 @@
           <p id="ai-recommend-status" class="sr-only" aria-live="polite"></p>
         </div>
 
-        <!-- Problems Grid -->
+        <!-- Problems Grid - Tags will be rendered with .tag class for clickability -->
         <div class="problems-grid"></div>
 
         <!-- Empty State -->
@@ -688,7 +764,6 @@
 
     <!-- Rust Playground Section -->
     <section id="rust-playground" class="section rust-playground-section">
-
       <div class="container">
         <div class="rust-hero">
           <h2 class="section-title">
@@ -876,80 +951,58 @@
 
           <!-- Overall Stages Roadmap (Original) -->
           <div class="roadmap-content" id="overviewRoadmapContainer">
-
-  <div class="overall-roadmap">
-
-    <div class="overall-stage">
-      <div class="stage-icon">🌱</div>
-      <h3>Beginner</h3>
-      <p>Build programming fundamentals and problem-solving skills.</p>
-
-      <div class="topic-list">
-        <span>Basic Programming</span>
-        <span>Arrays & Strings</span>
-        <span>Recursion</span>
-      </div>
-    </div>
-
-    <div class="road-arrow">
-    <i class="fas fa-arrow-down"></i>
-</div>
-
-    <div class="overall-stage">
-      <div class="stage-icon">⚡</div>
-      <h3>Intermediate</h3>
-      <p>Learn core data structures and optimization techniques.</p>
-
-      <div class="topic-list">
-        <span>Trees</span>
-        <span>Graphs</span>
-        <span>Dynamic Programming</span>
-      </div>
-    </div>
-
-    <div class="road-arrow">
-    <i class="fas fa-arrow-down"></i>
-</div>
-
-    <div class="overall-stage">
-      <div class="stage-icon">🚀</div>
-      <h3>Advanced</h3>
-      <p>Master advanced algorithms and competitive programming.</p>
-
-      <div class="topic-list">
-        <span>System Design</span>
-        <span>Advanced Graphs</span>
-        <span>Competitive Programming</span>
-      </div>
-    </div>
-
-    <div class="road-arrow">
-    <i class="fas fa-arrow-down"></i>
-</div>
-
-<div class="overall-stage">
-  <div class="stage-icon">👑</div>
-
-  <h3>DSA Pro</h3>
-
-  <p>
-    Achieve mastery in data structures and algorithms through
-    competitive programming, advanced optimization techniques,
-    and interview-level problem solving.
-  </p>
-
-  <div class="topic-list">
-    <span>Competitive Programming</span>
-    <span>Advanced Problem Solving</span>
-    <span>Interview Mastery</span>
-    <span>Optimization Techniques</span>
-  </div>
-
-</div>
-
-  </div>
-
-</div>
+            <div class="overall-roadmap">
+              <div class="overall-stage">
+                <div class="stage-icon">🌱</div>
+                <h3>Beginner</h3>
+                <p>Build programming fundamentals and problem-solving skills.</p>
+                <div class="topic-list">
+                  <span>Basic Programming</span>
+                  <span>Arrays & Strings</span>
+                  <span>Recursion</span>
+                </div>
+              </div>
+              <div class="road-arrow">
+                <i class="fas fa-arrow-down"></i>
+              </div>
+              <div class="overall-stage">
+                <div class="stage-icon">⚡</div>
+                <h3>Intermediate</h3>
+                <p>Learn core data structures and optimization techniques.</p>
+                <div class="topic-list">
+                  <span>Trees</span>
+                  <span>Graphs</span>
+                  <span>Dynamic Programming</span>
+                </div>
+              </div>
+              <div class="road-arrow">
+                <i class="fas fa-arrow-down"></i>
+              </div>
+              <div class="overall-stage">
+                <div class="stage-icon">🚀</div>
+                <h3>Advanced</h3>
+                <p>Master advanced algorithms and competitive programming.</p>
+                <div class="topic-list">
+                  <span>System Design</span>
+                  <span>Advanced Graphs</span>
+                  <span>Competitive Programming</span>
+                </div>
+              </div>
+              <div class="road-arrow">
+                <i class="fas fa-arrow-down"></i>
+              </div>
+              <div class="overall-stage">
+                <div class="stage-icon">👑</div>
+                <h3>DSA Pro</h3>
+                <p>Achieve mastery in data structures and algorithms through competitive programming, advanced optimization techniques, and interview-level problem solving.</p>
+                <div class="topic-list">
+                  <span>Competitive Programming</span>
+                  <span>Advanced Problem Solving</span>
+                  <span>Interview Mastery</span>
+                  <span>Optimization Techniques</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1062,14 +1115,11 @@
             <div class="card-icon">
               <i class="fas fa-file-alt"></i>
             </div>
-
             <h3>Resume Tips</h3>
-
             <p>
               Learn resume structure, ATS-friendly formatting, project
               presentation, and placement preparation.
             </p>
-
             <a
               href="resume-tips.html"
               class="card-btn"
@@ -1079,10 +1129,10 @@
                 display: inline-block;
                 text-align: center;
               ">
-                    Start Learning
-                    </a>
-              </div>
-              <div class="interview-card">
+              Start Learning
+            </a>
+          </div>
+          <div class="interview-card">
             <div class="card-icon">
               <i class="fas fa-shield-halved"></i>
             </div>
@@ -1114,7 +1164,6 @@
                 style="text-decoration: none; display: inline-block; text-align: center;">
                 Bulk Audit
             </a>
-          </div>
           </div>
         </div>
       </div>
@@ -1298,28 +1347,27 @@
       </div>
     </section>
 
-    
     <!-- Did You Know? Section -->
     <div class="dashboard-card facts-card">
       <div class="facts-header">
         <div class="facts-title">
-            <span class="facts-icon" aria-hidden="true">💡</span>
-            <h3>Did You Know?</h3>
+          <span class="facts-icon" aria-hidden="true">💡</span>
+          <h3>Did You Know?</h3>
         </div>
         <button onclick="showNextFact()" class="facts-btn">
-            Next Fact →
+          Next Fact →
         </button>
-    </div>
-    <div class="facts-content">
+      </div>
+      <div class="facts-content">
         <p id="factText" class="fact-text" aria-live="polite" aria-atomic="true">
-            Loading fact...
+          Loading fact...
         </p>
         <div class="facts-footer">
-            <span class="facts-date" id="factDate">📅 Fact of the day</span>
-            <span class="facts-counter" id="factCounter">1/15</span>
+          <span class="facts-date" id="factDate">📅 Fact of the day</span>
+          <span class="facts-counter" id="factCounter">1/15</span>
         </div>
+      </div>
     </div>
-</div>
 
     <!-- Gamification Section -->
     <section id="gamification" class="section gamification-section">
@@ -1565,8 +1613,6 @@
       </div>
     </div>
 
-    <!-- Chatbot Widget -->
-
     <!-- Code Editor Shortcuts Panel -->
     <div class="shortcuts-panel" id="shortcutsPanel">
       <div class="shortcuts-title">Keyboard Shortcuts</div>
@@ -1797,9 +1843,8 @@
                       <i class="fas fa-indent"></i><span class="btn-text"> Format</span>
                     </button>
                     <button class="editor-btn" id="aiInterviewerToggle" type="button" onclick="toggleAiInterviewer()" title="Invite AI Interviewer" aria-pressed="false" style="color: #10b981; border: 1px solid #10b981;">
-                     <i class="fas fa-user-tie"></i><span class="btn-text"> AI Interviewer</span>
+                      <i class="fas fa-user-tie"></i><span class="btn-text"> AI Interviewer</span>
                     </button>
-                  
                     <button
                       class="editor-btn"
                       onclick="toggleLineComment()"
@@ -1835,12 +1880,11 @@
                     <span>Output</span>
                     <i class="fas fa-chevron-down" id="outputToggleIcon"></i>
                   </button>
-                  </div>
-                  <div class="output-content" id="quizOutputContent">
-                    <p class="output-placeholder">
-                      Run your code to see output...
-                    </p>
-                  </div>
+                </div>
+                <div class="output-content" id="quizOutputContent">
+                  <p class="output-placeholder">
+                    Run your code to see output...
+                  </p>
                 </div>
               </div>
             </div>
@@ -2061,29 +2105,25 @@
             </div>
             <div class="account-actions">
               <button id="changePasswordBtn" class="btn btn-secondary">
-  <i class="fas fa-key"></i>
-  Change Password
-</button>
+                <i class="fas fa-key"></i> Change Password
+              </button>
               <button id="deactivateAccountBtn" class="btn btn-danger">
-                <i class="fas fa-user-slash"></i>
-                Deactivate Account
+                <i class="fas fa-user-slash"></i> Deactivate Account
               </button>
               <button id="deleteAccountBtn" class="btn btn-danger">
-    <i class="fas fa-trash"></i>
-    Delete Account
-  </button>
-</div>
+                <i class="fas fa-trash"></i> Delete Account
+              </button>
             </div>
           </div>
-          
-          <!-- Languages Section -->
-          <div class="profile-languages big-box" style="margin-top: 1.5rem; padding: 1.5rem; text-align: left; border-radius: var(--border-radius); border: 1px solid var(--glass-border); background: var(--dark-card);">
-            <h4 style="margin: 0 0 1rem 0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
-              <span>💻</span> Known Languages
-            </h4>
-            <div id="profileLanguagesSection" class="languages-list" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <!-- Dynamic chips -->
-            </div>
+        </div>
+        
+        <!-- Languages Section -->
+        <div class="profile-languages big-box" style="margin-top: 1.5rem; padding: 1.5rem; text-align: left; border-radius: var(--border-radius); border: 1px solid var(--glass-border); background: var(--dark-card);">
+          <h4 style="margin: 0 0 1rem 0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
+            <span>💻</span> Known Languages
+          </h4>
+          <div id="profileLanguagesSection" class="languages-list" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <!-- Dynamic chips -->
           </div>
         </div>
       </div>
@@ -2099,7 +2139,6 @@
       <div class="modal-content notes-modal-content">
         <div class="modal-header">
           <h3 id="notesModalTitle">Problem Notes</h3>
-
           <button
             class="modal-close"
             id="notesModalClose"
@@ -2108,174 +2147,152 @@
             <i class="fas fa-times"></i>
           </button>
         </div>
-
         <div class="modal-body">
           <label for="problemNotesInput">Problem notes</label>
-
           <textarea
             id="problemNotesInput"
             class="notes-textarea"
             placeholder="Write your notes, hints, observations, or edge cases here..."
           ></textarea>
         </div>
-
         <div class="modal-footer">
           <button class="btn btn-secondary" id="closeNotesBtn">Close</button>
-
           <button class="btn btn-primary" id="saveNotesBtn">
-            <i class="fas fa-save"></i>
-            Save Notes
+            <i class="fas fa-save"></i> Save Notes
           </button>
         </div>
       </div>
     </div>
 
     <div class="modal" id="changePasswordModal">
-  <div class="modal-content">
-
-    <div class="modal-header">
-      <h3>Change Password</h3>
-
-      <button
-        class="modal-close"
-        id="changePasswordClose"
-        aria-label="Close"
-      >
-        &times;
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <div class="profile-edit-form">
-
-        <div
-          id="changePasswordMessage"
-          class="password-message"
-          role="alert"
-        ></div>
-
-        <!-- Current Password -->
-        <div class="password-field">
-          <label for="currentPassword">Current Password</label>
-
-          <div class="password-input-wrapper">
-            <input
-              type="password"
-              id="currentPassword"
-              placeholder="Enter current password"
-            />
-
-            <button
-              type="button"
-              class="password-toggle"
-              data-target="currentPassword"
-            >
-              <i class="fas fa-eye"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- New Password -->
-        <div class="password-field">
-          <label for="newPassword">New Password</label>
-
-          <div class="password-input-wrapper">
-            <input
-              type="password"
-              id="newPassword"
-              placeholder="Create a strong password"
-            />
-
-            <button
-              type="button"
-              class="password-toggle"
-              data-target="newPassword"
-            >
-              <i class="fas fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="password-strength">
-            <div
-              id="passwordStrengthBar"
-              class="strength-bar"
-            ></div>
-          </div>
-
-          <span
-            id="passwordStrengthText"
-            class="strength-text"
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change Password</h3>
+          <button
+            class="modal-close"
+            id="changePasswordClose"
+            aria-label="Close"
           >
-            Password strength
-          </span>
-
-          <ul class="password-rules">
-            <li id="ruleLength">Minimum 8 characters</li>
-            <li id="ruleUpper">One uppercase letter</li>
-            <li id="ruleLower">One lowercase letter</li>
-            <li id="ruleNumber">One number</li>
-            <li id="ruleSpecial">One special character</li>
-          </ul>
+            &times;
+          </button>
         </div>
+        <div class="modal-body">
+          <div class="profile-edit-form">
+            <div
+              id="changePasswordMessage"
+              class="password-message"
+              role="alert"
+            ></div>
 
-        <!-- Confirm Password -->
-        <div class="password-field">
-          <label for="confirmNewPassword">
-            Confirm New Password
-          </label>
+            <!-- Current Password -->
+            <div class="password-field">
+              <label for="currentPassword">Current Password</label>
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="currentPassword"
+                  placeholder="Enter current password"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  data-target="currentPassword"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
 
-          <div class="password-input-wrapper">
-            <input
-              type="password"
-              id="confirmNewPassword"
-              placeholder="Confirm new password"
-            />
+            <!-- New Password -->
+            <div class="password-field">
+              <label for="newPassword">New Password</label>
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="newPassword"
+                  placeholder="Create a strong password"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  data-target="newPassword"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <div class="password-strength">
+                <div
+                  id="passwordStrengthBar"
+                  class="strength-bar"
+                ></div>
+              </div>
+              <span
+                id="passwordStrengthText"
+                class="strength-text"
+              >
+                Password strength
+              </span>
+              <ul class="password-rules">
+                <li id="ruleLength">Minimum 8 characters</li>
+                <li id="ruleUpper">One uppercase letter</li>
+                <li id="ruleLower">One lowercase letter</li>
+                <li id="ruleNumber">One number</li>
+                <li id="ruleSpecial">One special character</li>
+              </ul>
+            </div>
 
-            <button
-              type="button"
-              class="password-toggle"
-              data-target="confirmNewPassword"
-            >
-              <i class="fas fa-eye"></i>
-            </button>
+            <!-- Confirm Password -->
+            <div class="password-field">
+              <label for="confirmNewPassword">
+                Confirm New Password
+              </label>
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="confirmNewPassword"
+                  placeholder="Confirm new password"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  data-target="confirmNewPassword"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <small
+                id="confirmPasswordError"
+                class="field-error"
+              ></small>
+            </div>
           </div>
-
-          <small
-            id="confirmPasswordError"
-            class="field-error"
-          ></small>
         </div>
-
+        <div class="modal-footer">
+          <button
+            class="btn btn-secondary"
+            id="cancelPasswordChange"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            id="savePasswordBtn"
+          >
+            Change Password
+          </button>
+        </div>
       </div>
     </div>
-
-    <div class="modal-footer">
-      <button
-        class="btn btn-secondary"
-        id="cancelPasswordChange"
-      >
-        Cancel
-      </button>
-
-      <button
-        class="btn btn-primary"
-        id="savePasswordBtn"
-      >
-        Change Password
-      </button>
-    </div>
-
-  </div>
-</div>
-<section id="study-timer" class="glass-card" style="margin: 20px auto; padding: 20px; text-align: center; max-width: 600px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-    <h3 style="margin-bottom: 15px; color: var(--text-primary);">Focus Mode</h3>
-    <div class="timer-display" id="timer-display" role="timer" aria-live="polite" aria-atomic="true" aria-label="Focus session time remaining" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 15px;">25:00</div>
-    <div class="timer-controls" style="display: flex; gap: 10px; justify-content: center;">
+    
+    <section id="study-timer" class="glass-card" style="margin: 20px auto; padding: 20px; text-align: center; max-width: 600px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+      <h3 style="margin-bottom: 15px; color: var(--text-primary);">Focus Mode</h3>
+      <div class="timer-display" id="timer-display" role="timer" aria-live="polite" aria-atomic="true" aria-label="Focus session time remaining" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 15px;">25:00</div>
+      <div class="timer-controls" style="display: flex; gap: 10px; justify-content: center;">
         <button id="start-btn" class="btn btn-primary">Start</button>
         <button id="pause-btn" class="btn btn-secondary">Pause</button>
         <button id="reset-btn" class="btn btn-secondary">Reset</button>
-    </div>
-</section>
+      </div>
+    </section>
     </main>
 
     <!-- Footer -->
@@ -2339,10 +2356,10 @@
 
     <script src="/pages/learning/rust-learning.js"></script>
     <script type="module" src="./modules/firebase-client.js"></script>
-<script src="interceptors.js"></script>
-<script src="auth.js"></script>
-<script src="utils/virtualList.js"></script>
-<script src="utils/navigationManager.js"></script>
+    <script src="interceptors.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils/virtualList.js"></script>
+    <script src="utils/navigationManager.js"></script>
     <script src="timer.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="utils/searchEngine.js"></script>
@@ -2358,45 +2375,28 @@
       });
       loadPartial("footer-placeholder", "/partials/footer.html");
     </script>
+    
     <!-- Keyboard Shortcut Modal -->
-<div id="shortcutModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:999;">
-    <div style="background:white; padding:30px; border-radius:12px; max-width:400px; width:90%;">
+    <div id="shortcutModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:999;">
+      <div style="background:white; padding:30px; border-radius:12px; max-width:400px; width:90%;">
         <h3>⌨️ Keyboard Shortcuts</h3>
         <div style="margin:15px 0;">
-            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Search</span><kbd>Ctrl+K</kbd></div>
-            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Home</span><kbd>Alt+H</kbd></div>
-            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Topics</span><kbd>Alt+T</kbd></div>
-            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Practice</span><kbd>Alt+P</kbd></div>
-            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Quiz</span><kbd>Alt+Q</kbd></div>
-            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Dashboard</span><kbd>Alt+D</kbd></div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Search</span><kbd>Ctrl+K</kbd></div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Home</span><kbd>Alt+H</kbd></div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Topics</span><kbd>Alt+T</kbd></div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Practice</span><kbd>Alt+P</kbd></div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Quiz</span><kbd>Alt+Q</kbd></div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>Dashboard</span><kbd>Alt+D</kbd></div>
         </div>
         <button onclick="closeShortcutModal()" style="padding:8px 20px; background:#7c3aed; color:white; border:none; border-radius:6px; cursor:pointer;">Close</button>
+      </div>
     </div>
-</div>
 
-<!-- Back to Top Button -->
-<button 
-    id="backToTop" 
-    class="back-to-top" 
-<!-- Back to Top Button -->
-<button 
-    id="backToTop" 
-    class="back-to-top" 
-    aria-label="Back to top"
-    title="Scroll back to top"
->
-    <svg class="progress-ring" viewBox="0 0 44 44" aria-hidden="true">
-        <circle cx="22" cy="22" r="20"></circle>
-        <circle class="progress-ring-fill" cx="22" cy="22" r="20"></circle>
-    </svg>
-    <i class="fas fa-arrow-up" aria-hidden="true"></i>
-</button>
-<!-- Footer Shortcut Trigger -->
-<footer>
-    <button onclick="openShortcutModal()" style="background:none; border:none; color:#6b7280; cursor:pointer; text-decoration:underline;">
+    <!-- Footer Shortcut Trigger -->
+    <footer>
+      <button onclick="openShortcutModal()" style="background:none; border:none; color:#6b7280; cursor:pointer; text-decoration:underline;">
         ⌨️ Keyboard Shortcuts
-    </button>
-</footer>
-
+      </button>
+    </footer>
   </body>
 </html>
