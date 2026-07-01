@@ -6124,3 +6124,169 @@ function updateProblemCount(filteredProblems) {
     }
 }
 
+
+// ============================================
+// FAVORITES EMPTY STATE
+// ============================================
+
+/**
+ * Show/hide appropriate empty state based on filter
+ * @param {string} filter - Current filter ('all', 'easy', 'medium', 'hard', 'favorites')
+ * @param {Array} filteredProblems - Filtered problems array
+ */
+function showEmptyState(filter, filteredProblems) {
+    const regularEmpty = document.getElementById('emptyState');
+    const favoritesEmpty = document.getElementById('favoritesEmptyState');
+    
+    // Hide both initially
+    if (regularEmpty) regularEmpty.classList.add('hidden');
+    if (favoritesEmpty) favoritesEmpty.classList.add('hidden');
+    
+    // If there are problems, hide all empty states
+    if (filteredProblems && filteredProblems.length > 0) {
+        return;
+    }
+    
+    // Show appropriate empty state
+    if (filter === 'favorites') {
+        if (favoritesEmpty) favoritesEmpty.classList.remove('hidden');
+    } else {
+        if (regularEmpty) regularEmpty.classList.remove('hidden');
+    }
+}
+
+/**
+ * Clear all filters and show all problems
+ */
+function clearAllFilters() {
+    // Reset filter buttons
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => btn.classList.remove('active'));
+    const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+    if (allBtn) allBtn.classList.add('active');
+    
+    // Clear search
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = '';
+        currentSearch = '';
+    }
+    
+    // Reset and render
+    currentFilter = 'all';
+    currentPage = 1;
+    renderProblems();
+}
+
+/**
+ * Browse problems (scroll to practice section)
+ */
+function browseProblems() {
+    const practiceSection = document.getElementById('practice');
+    if (practiceSection) {
+        practiceSection.scrollIntoView({ behavior: 'smooth' });
+        // Focus on search
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            setTimeout(() => searchInput.focus(), 500);
+        }
+    }
+}
+
+// --- OVERRIDE FILTER PROBLEMS ---
+
+// Update the existing filterProblems function or add this logic
+function filterProblems() {
+    const selectedDifficulty = getSelectedDifficulty();
+    const allProblems = getProblems();
+    const searchTerm = currentSearch || '';
+    
+    // Filter by difficulty
+    let filtered = filterProblemsByDifficulty(selectedDifficulty, allProblems);
+    
+    // Filter by search term
+    if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(problem => 
+            problem.title.toLowerCase().includes(term) ||
+            problem.tags.some(tag => tag.toLowerCase().includes(term)) ||
+            (problem.description && problem.description.toLowerCase().includes(term))
+        );
+    }
+    
+    // Update count
+    updateProblemCount(filtered);
+    
+    // Show appropriate empty state
+    showEmptyState(selectedDifficulty, filtered);
+    
+    // Render with pagination
+    renderProblemsWithPagination(filtered);
+}
+
+// --- INITIALIZE BUTTONS ---
+
+/**
+ * Initialize favorite empty state buttons
+ */
+function initFavoriteEmptyStateButtons() {
+    const showAllBtn = document.getElementById('showAllProblemsBtn');
+    const browseBtn = document.getElementById('browseProblemsBtn');
+    
+    if (showAllBtn) {
+        showAllBtn.addEventListener('click', clearAllFilters);
+    }
+    
+    if (browseBtn) {
+        browseBtn.addEventListener('click', browseProblems);
+    }
+}
+
+// --- INITIALIZE ---
+
+// Add to DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing init code ...
+    initFavoriteEmptyStateButtons();
+});
+
+// ============================================
+// RENDER PROBLEMS WITH EMPTY STATES
+// ============================================
+
+function renderProblemsWithPagination(filteredProblems) {
+    const totalProblems = filteredProblems.length;
+    const totalPages = Math.max(1, Math.ceil(totalProblems / PROBLEMS_PER_PAGE));
+    
+    if (currentPage > totalPages) currentPage = totalPages;
+    
+    const start = (currentPage - 1) * PROBLEMS_PER_PAGE;
+    const end = Math.min(start + PROBLEMS_PER_PAGE, totalProblems);
+    const pageProblems = filteredProblems.slice(start, end);
+    
+    // Show empty state if no problems
+    const currentFilter = getSelectedDifficulty();
+    showEmptyState(currentFilter, filteredProblems);
+    
+    // Render the problems
+    renderProblems(pageProblems);
+    
+    // Update pagination
+    updatePaginationControls(currentPage, totalPages);
+}
+
+function renderProblems(problems) {
+    const problemsGrid = document.querySelector('.problems-grid');
+    if (!problemsGrid) return;
+    
+    if (!problems || problems.length === 0) {
+        problemsGrid.innerHTML = '';
+        return;
+    }
+    
+    // ... existing render logic ...
+    problemsGrid.innerHTML = problems.map(problem => {
+        // ... problem card HTML ...
+        return `<div class="problem-card">...</div>`;
+    }).join('');
+}

@@ -10171,3 +10171,112 @@ mark.search-highlight {
     }
   }
 }
+/* ===== FAVORITES EMPTY STATE ===== */
+
+.favorites-empty .empty-state-icon {
+  font-size: 64px;
+  color: #ef4444;
+  display: block;
+  margin-bottom: 16px;
+  animation: heartPulse 1.5s ease-in-out infinite;
+}
+
+.favorites-empty h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.favorites-empty p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.favorites-empty .empty-state-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.favorites-empty .empty-state-actions .btn {
+  min-width: 160px;
+  justify-content: center;
+}
+
+.favorites-empty .btn-primary {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.favorites-empty .btn-primary:hover {
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+}
+
+.favorites-empty .btn-secondary {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.favorites-empty .btn-secondary:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@keyframes heartPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Dark Theme */
+.dark .favorites-empty .btn-secondary {
+  border-color: #f87171;
+  color: #f87171;
+}
+
+.dark .favorites-empty .btn-secondary:hover {
+  background: rgba(248, 113, 113, 0.15);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .favorites-empty .empty-state-icon {
+    font-size: 48px;
+  }
+  
+  .favorites-empty h3 {
+    font-size: 1.25rem;
+  }
+  
+  .favorites-empty .empty-state-actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .favorites-empty .empty-state-actions .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .favorites-empty .empty-state-icon {
+    font-size: 40px;
+  }
+  
+  .favorites-empty h3 {
+    font-size: 1.1rem;
+  }
+  
+  .favorites-empty p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .favorites-empty .empty-state-icon {
+    animation: none;
+  }
+}
