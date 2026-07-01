@@ -243,6 +243,11 @@ async function loadPartial(id, url) {
     
     document.getElementById(id).innerHTML = html;
     handleActiveNav();
+    if (id === 'navbar-placeholder' || id === 'navbar') {
+      if (typeof initNavbar === 'function') {
+        initNavbar();
+      }
+    }
   } catch (e) {
     if (e.name !== 'AbortError') {
       console.warn('Could not load partial:', url);
@@ -378,7 +383,7 @@ const practiceProblems = [
   { id: 9, title: "Trapping Rain Water", difficulty: "hard", tags: ["Arrays", "Two Pointers"], acceptance: "48.7%", category: "arrays", description: "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.", constraints: ["1 ≤ height.length ≤ 2 × 10⁴", "0 ≤ height[i] ≤ 10⁵"], followUp: "Can you solve it in O(n) time and O(1) space using the two-pointer technique?", functionName: "trap", params: ["height"], guide: "height: array of non-negative integers representing bar heights in the elevation map\nreturns: total units of rainwater that can be trapped between the bars\n\nHint: Use two pointers (left at 0, right at end). Track maxLeft and maxRight. At each step, process the shorter side: if height[left] < height[right], water += max(0, maxLeft - height[left]), else water += max(0, maxRight - height[right]).", testCases: [{ input: [[0,1,0,2,1,0,1,3,2,1,2,1]], expected: 6 }, { input: [[4,2,0,3,2,5]], expected: 9 }] },
   { id: 10, title: "Reverse Linked List", difficulty: "easy", tags: ["Linked List"], acceptance: "72.1%", category: "linkedlist", description: "Given an array representing a linked list, reverse it and return the reversed array.", constraints: ["0 ≤ arr.length ≤ 5000", "-5000 ≤ arr[i] ≤ 5000"], followUp: "Can you solve it both iteratively and recursively?", functionName: "reverseList", params: ["head"], guide: "head: array of integers representing the linked list values\nreturns: reversed array with elements in opposite order\n\nHint: Use two pointers (prev starts empty, curr starts at head). Iterate through, reversing each element's position.", testCases: [{ input: [[1,2,3,4,5]], expected: [5,4,3,2,1] }, { input: [[1,2]], expected: [2,1] }, { input: [[]], expected: [] }] },
   { id: 11, title: "Invert Binary Tree", difficulty: "easy", tags: ["Trees", "DFS"], acceptance: "68.5%", category: "trees", description: "Given a binary tree represented as a level-order array, invert it and return the inverted level-order array.", constraints: ["0 ≤ arr.length ≤ 100", "-100 ≤ arr[i] ≤ 100"], followUp: "Can you solve it both recursively and iteratively using a queue or stack?", functionName: "invertTree", params: ["root"], guide: "root: level-order array of integers representing the binary tree (null for missing nodes)\nreturns: level-order array of the inverted binary tree (swapped left/right children)\n\nHint: Recursively swap left and right children at each node. Base case: when root is null or empty.", testCases: [{ input: [[4,2,7,1,3,6,9]], expected: [4,7,2,9,6,3,1] }, { input: [[2,1,3]], expected: [2,3,1] }, { input: [[]], expected: [] }] },
-  { id: 12, title: "Validate BST", difficulty: "medium", tags: ["Trees", "Recursion"], acceptance: "28.4%", category: "trees", description: "Given a binary tree represented as a level-order array (null for missing children), determine if it is a valid BST.", constraints: ["1 ≤ arr.length ≤ 10⁴", "-2³¹ ≤ arr[i] ≤ 2³¹ - 1"], followUp: "Can you solve it without recursion?", functionName: "isValidBST", testCases: [{ input: [[2,1,3]], expected: true }, { input: [[5,1,4,null,null,3,6]], expected: false }] },
+  { id: 12, title: "Validate BST", difficulty: "medium", tags: ["Trees", "Recursion"], acceptance: "28.4%", category: "trees", description: "Given a binary tree represented as a level-order array (null for missing children), determine if it is a valid BST.", constraints: ["1 ≤ arr.length ≤ 10⁴", "-2³¹ ≤ arr[i] ≤ 2³¹ - 1"], followUp: "Can you solve it without recursion?", functionName: "isValidBST", params: ["root"], guide: "root: level-order array of integers representing the binary tree (null for missing nodes)\nreturns: true if the tree is a valid BST (left < root < right for every node), false otherwise", testCases: [{ input: [[2,1,3]], expected: true }, { input: [[5,1,4,null,null,3,6]], expected: false }] },
   { id: 13, title: "Number of Islands", difficulty: "medium", tags: ["Graphs", "DFS"], acceptance: "54.8%", category: "graphs", description: "Given an m x n 2D binary grid which represents a map of '1's (land) and '0's (water), return the number of islands.", constraints: ["1 ≤ m, n ≤ 300", "grid[i][j] is '0' or '1'"], followUp: "Can you solve it using both DFS and Union-Find?", functionName: "numIslands", testCases: [{ input: [[["1","1","1","1","0"],["1","1","0","1","0"],["1","1","0","0","0"],["0","0","0","0","0"]]], expected: 1 }, { input: [[["1","1","0","0","0"],["1","1","0","0","0"],["0","0","1","0","0"],["0","0","0","1","1"]]], expected: 3 }, { input: [[["0"]]], expected: 0 }] },
   { id: 14, title: "House Robber", difficulty: "medium", tags: ["DP", "Arrays"], acceptance: "42.3%", category: "dp", description: "You are a professional robber planning to rob houses along a street. Return the maximum amount of money you can rob without robbing two adjacent houses.", constraints: ["1 ≤ nums.length ≤ 100", "0 ≤ nums[i] ≤ 400"], followUp: "What if the houses are arranged in a circle?", functionName: "rob", testCases: [{ input: [[1,2,3,1]], expected: 4 }, { input: [[2,7,9,3,1]], expected: 12 }, { input: [[2,1,1,2]], expected: 4 }] },
   { id: 15, title: "Course Schedule", difficulty: "medium", tags: ["Graphs", "Topological Sort"], acceptance: "44.7%", category: "graphs", description: "There are numCourses courses. Given prerequisites, return true if you can finish all courses.", constraints: ["1 ≤ numCourses ≤ 2000", "0 ≤ prerequisites.length ≤ 5000", "prerequisites[i].length == 2"], followUp: "Can you return the actual valid course order?", functionName: "canFinish", testCases: [{ input: [2, [[1,0]]], expected: true }, { input: [2, [[1,0],[0,1]]], expected: false }] },
@@ -852,8 +857,424 @@ function initNavbar() {
     if (!isMobile()) {
       if (navLinks.classList.contains("active")) toggleMenu(false);
       document.querySelectorAll(".has-dropdown.open").forEach(el => el.classList.remove("open"));
-      dropdownToggles.forEach(toggle => toggle.setAttribute("aria-expanded", "false"));
+        dropdownToggles.forEach(toggle => toggle.setAttribute("aria-expanded", "false"));
     }
+  });
+
+  // Initialize navbar search
+  initNavbarSearch();
+}
+
+// ===== NAVBAR SEARCH LOGIC =====
+function initNavbarSearch() {
+  const searchInputs = document.querySelectorAll(".nav-search-input");
+  if (!searchInputs.length) return;
+
+  const searchIndex = [
+    // Learn - Main
+    { title: "DSA Topics", url: "/index.html#topics", category: "Learn", keywords: "dsa topics algorithms structures data arrays stacks queues graphs trees" },
+    { title: "Practice Problems", url: "/index.html#practice", category: "Learn", keywords: "practice problems coding solutions challenges leetcode" },
+    { title: "Quizzes", url: "/pages/tools/quiz-system/quiz-system.html", category: "Learn", keywords: "quizzes assessments tests knowledge check" },
+    { title: "Learning Roadmap", url: "/index.html#roadmap", category: "Learn", keywords: "roadmap path syllabus curriculum guide tracks" },
+    { title: "Intermediate Roadmap", url: "/pages/learning/intermediate-roadmap/intermediate-roadmap.html", category: "Learn", keywords: "intermediate roadmap path backend advanced frontend" },
+    { title: "Algorithm Timeline", url: "/pages/visualizers/algorithm-timeline/algorithm-timeline.html", category: "Learn", keywords: "algorithm timeline history evolution milestones" },
+    { title: "Concept Bridge Trainer", url: "/pages/learning/concept-bridge/concept-bridge.html", category: "Learn", keywords: "concept bridge trainer math science connections analogies" },
+    { title: "Problem Solving Framework", url: "/pages/tools/problem-solving-framework/problem-solving-framework.html", category: "Learn", keywords: "problem solving framework template steps methodology" },
+    { title: "Think-Aloud AI Judge", url: "/pages/tools/think-aloud-judge/think-aloud-judge.html", category: "Learn", keywords: "think-aloud ai judge feedback review debugger advisor" },
+    { title: "Reverse Interview Mode", url: "/pages/interview/reverse-interview/reverse-interview.html", category: "Learn", keywords: "reverse interview client requirement design conversation" },
+    { title: "Cognitive Load Analyzer", url: "/pages/tools/cognitive-load-analyzer/cognitive-load-analyzer.html", category: "Learn", keywords: "cognitive load analyzer difficulty readability complexity" },
+    { title: "AI Memory Scanner", url: "/pages/tools/memory-scanner/memory-scanner.html", category: "Learn", keywords: "ai memory scanner spaced repetition retention cards flashcards" },
+    { title: "Problem Deconstructor", url: "/pages/tools/problem-deconstructor/problem-deconstructor.html", category: "Learn", keywords: "problem deconstructor subproblems divide conquer breakdown" },
+    { title: "Cross Topic Trainer", url: "/pages/tools/cross-topic-trainer/cross-topic-trainer.html", category: "Learn", keywords: "cross topic trainer mix graphs trees heaps arrays" },
+    { title: "Wrong Turn Replay", url: "/pages/tools/wrong-turn-replay/wrong-turn-replay.html", category: "Learn", keywords: "wrong turn replay debug errors mistakes bug tracker history" },
+    { title: "Compare Code", url: "/pages/tools/compare/compare.html", category: "Learn", keywords: "compare code diff solutions languages benchmark performance" },
+    { title: "Reverse Complexity", url: "/pages/tools/reverse-complexity/reverse-complexity.html", category: "Learn", keywords: "reverse complexity big o space time code generator constraint" },
+    
+    // Learn - DSA Topics
+    { title: "Learn Arrays", url: "/pages/learning/array-learning/array-learning.html", category: "Data Structures", keywords: "arrays dynamic linear vectors list matrices" },
+    { title: "Learn Linked Lists", url: "/pages/learning/linkedlist-learning/linkedlist-learning.html", category: "Data Structures", keywords: "linked lists singly doubly circular pointers nodes" },
+    { title: "Learn Stacks", url: "/pages/learning/stack-learning/stack-learning.html", category: "Data Structures", keywords: "stacks lifo push pop callstack brackets balance" },
+    { title: "Learn Queues", url: "/pages/visualizers/stack-queue-visualizer/stack-queue-visualizer.html", category: "Data Structures", keywords: "queues stack queue visualizer fifo push pop shift double ended deque circular" },
+    { title: "Learn Trees", url: "/pages/learning/trees-learning/trees-learning.html", category: "Data Structures", keywords: "trees bst binary search tree avl red black node" },
+    { title: "Tree Traversals", url: "/pages/visualizers/tree-traversal/tree-traversal.html", category: "Data Structures", keywords: "tree traversals inorder preorder postorder levelorder bfs dfs" },
+    { title: "Learn Graphs", url: "/pages/learning/graph-learning/graph-learning.html", category: "Data Structures", keywords: "graphs vertices edges adjacent representations list matrix" },
+    { title: "Learn Matrix", url: "/pages/learning/matrix-learning/matrix-learning.html", category: "Data Structures", keywords: "matrix grid 2d array dimensions rows columns cells" },
+    { title: "Learn Heaps", url: "/pages/learning/heaps-learning/heaps-learning.html", category: "Data Structures", keywords: "heaps priority queue binary min max heap tree" },
+    { title: "Learn Prefix Sum", url: "/pages/learning/prefix-sum-learning/prefix-sum-learning.html", category: "Data Structures", keywords: "prefix sum array query range sum linear scan" },
+    { title: "Learn Sliding Window", url: "/pages/learning/sliding-window-learning/sliding-window-learning.html", category: "Algorithms", keywords: "sliding window subarray substring unique max sum" },
+    { title: "Learn Recursion", url: "/pages/learning/recursion-learning/recursion-learning.html", category: "Algorithms", keywords: "recursion induction call stack base case backtracking" },
+    { title: "Learn Divide & Conquer", url: "/pages/learning/divide-and-conquer-learning/divide-and-conquer-learning.html", category: "Algorithms", keywords: "divide conquer merge sort quick binary search" },
+    { title: "Learn Bit Manipulation", url: "/pages/learning/bit-manipulation-learning/bit-manipulation-learning.html", category: "Algorithms", keywords: "bit manipulation operations mask shift xor and or not" },
+    { title: "Learn Binary Search", url: "/pages/visualizers/pathfinding-visualizer/pathfinding-visualizer.html", category: "Algorithms", keywords: "binary search divide conquer sorted list logarithmic pathfinding" },
+    { title: "Learn Shortest Path", url: "/pages/learning/shortest-path-learning/shortest-path-learning.html", category: "Algorithms", keywords: "shortest path dijkstra bellman ford spfa floyd warshall graph" },
+    { title: "Learn MST (Minimum Spanning Tree)", url: "/pages/learning/mst-learning/mst-learning.html", category: "Algorithms", keywords: "minimum spanning tree mst kruskal prim graph disjoint set union dsu" },
+    { title: "Learn Segment Tree", url: "/pages/learning/segment-tree-learning/segment-tree-learning.html", category: "Data Structures", keywords: "segment tree range queries update sum min max lazy propagation" },
+    { title: "Learn Fenwick Tree", url: "/pages/learning/fenwick-tree-learning/fenwick-tree-learning.html", category: "Data Structures", keywords: "fenwick tree binary indexed tree bit range sum point update" },
+    { title: "Learn Sparse Table", url: "/pages/learning/sparse-table-learning/sparse-table-learning.html", category: "Data Structures", keywords: "sparse table range queries rmq static array constant time" },
+    { title: "Learn Trie & Strings", url: "/pages/learning/trie-string-learning/trie-string-learning.html", category: "Data Structures", keywords: "trie strings suffix tree prefix pattern search autocomplete" },
+    { title: "Learn CP Patterns", url: "/pages/learning/cp-patterns-learning/cp-patterns-learning.html", category: "Algorithms", keywords: "cp patterns competitive programming template tricks math" },
+    { title: "Learn Bitmask DP", url: "/pages/learning/bitmask-dp-learning/bitmask-dp-learning.html", category: "Algorithms", keywords: "bitmask dp dynamic programming exponential states subset" },
+    { title: "Learn DP (Dynamic Programming)", url: "/pages/learning/dp-learning/dp-learning.html", category: "Algorithms", keywords: "dynamic programming dp memoization tabulation knapsack" },
+
+    // Languages & Core
+    { title: "Learn Python", url: "/pages/learning/python-learning/python-learning.html", category: "Languages", keywords: "python basics core syntax loops list dict oop" },
+    { title: "Learn JavaScript", url: "/pages/learning/javascript-learning/javascript-learning.html", category: "Languages", keywords: "javascript es6 async promise DOM fetch object functional" },
+    { title: "Learn Java", url: "/pages/learning/java-learning/java-learning.html", category: "Languages", keywords: "java oop inheritance polymorphism collections stream multithread" },
+    { title: "Learn C++", url: "/pages/learning/cplusplus-learning/cplusplus-learning.html", category: "Languages", keywords: "c++ cpp stl pointers references structures class templates" },
+    { title: "Learn C", url: "/pages/learning/c-learning/c-learning.html", category: "Languages", keywords: "c manual memory malloc pointers structures files low level" },
+    { title: "Learn PHP", url: "/pages/learning/php-learning/php-learning.html", category: "Languages", keywords: "php web backend server request db mysql session" },
+    { title: "Learn DBMS", url: "/pages/learning/dbms-learning/dbms-learning.html", category: "Core CS", keywords: "dbms database relational sql normal forms transactions acid locks" },
+    { title: "Learn Operating Systems", url: "/pages/learning/os-learning/os-learning.html", category: "Core CS", keywords: "operating systems os threads processes scheduling memory paging deadlock virtual" },
+    { title: "Learn Comp. Architecture", url: "/pages/learning/computer-architecture/computer-architecture.html", category: "Core CS", keywords: "computer architecture assembly cpu cache registers pipeline instructions" },
+    { title: "Learn OOP (Object Oriented Programming)", url: "/pages/learning/oop-learning/oop-learning.html", category: "Core CS", keywords: "oop object oriented inheritance polymorphism encapsulation abstraction interfaces" },
+    { title: "Learn SQL", url: "/pages/learning/sql-learning/sql-learning.html", category: "Core CS", keywords: "sql query databases select join group by indexes optimization schemas" },
+    { title: "Learn Power BI", url: "/pages/learning/powerbi-learning/powerbi-learning.html", category: "Core CS", keywords: "power bi data analysis visualization dashboard reports query dax" },
+
+    // System Design
+    { title: "Learn System Design", url: "/pages/resources/system-design/system-design.html", category: "System Design", keywords: "system design scalability load balancer caching sharding microservices replication cap" },
+    { title: "Learn API Design", url: "/pages/learning/api-design-learning/api-design-learning.html", category: "System Design", keywords: "api design rest graphql gRPC status codes endpoints auth rate limiting spec" },
+    { title: "Learn Cache Systems", url: "/pages/learning/cache-learning/cache-learning.html", category: "System Design", keywords: "cache systems lru lfu eviction policies write back through consistency cache hit miss" },
+
+    // Visualizers & Tools
+    { title: "Sorting Visualizer", url: "/pages/sort/sorting-visualizer.html", category: "Visualizers", keywords: "sorting visualizer bubble merge quick heap comparison animation" },
+    { title: "Graph Visualizer", url: "/pages/visualizers/graph-visualizer/graph-visualizer.html", category: "Visualizers", keywords: "graph visualizer representation bfs dfs adjacency list" },
+    { title: "Pathfinding Visualizer", url: "/pages/visualizers/pathfinding-visualizer/pathfinding-visualizer.html", category: "Visualizers", keywords: "pathfinding visualizer a star dijkstra bfs dfs maze generator grid" },
+    { title: "Recursion Tree Visualizer", url: "/pages/visualizers/recursion-tree-visualizer/recursion-tree-visualizer.html", category: "Visualizers", keywords: "recursion tree visualizer fibonacci call stack tree visualization" },
+    { title: "Tree Visualizer", url: "/pages/visualizers/tree-visualizer/tree-visualizer.html", category: "Visualizers", keywords: "tree visualizer bst binary search tree heap visualizer" },
+    { title: "Complexity Calculator", url: "/pages/tools/complexity-calculator/complexity-calculator.html", category: "Tools", keywords: "complexity calculator space time complexity analyser big o calculator" },
+    { title: "Pattern Recognition Trainer", url: "/pages/tools/pattern-trainer/pattern-trainer.html", category: "Tools", keywords: "pattern recognition trainer identify problems clues" },
+    { title: "Edge Case Generator", url: "/pages/tools/edge-case-generator/edge-case-generator.html", category: "Tools", keywords: "edge case generator arrays strings extreme inputs numbers bounds check" },
+    { title: "Dry Run Simulator", url: "/pages/tools/dry-run-simulator/dry-run-simulator.html", category: "Tools", keywords: "dry run simulator code trace variables step execution state debugger" },
+    { title: "Solution Evolution", url: "/pages/tools/solution-evolution/solution-evolution.html", category: "Tools", keywords: "solution evolution brute force optimized optimized space code transformation" },
+    { title: "Algorithm Crime Lab", url: "/pages/tools/investigation-lab/investigation-lab.html", category: "Tools", keywords: "algorithm crime lab investigate bugs logs crash dumps issues debug" },
+    { title: "DSA Mythbusters", url: "/pages/tools/algorithm-mythology/algorithm-mythology.html", category: "Tools", keywords: "dsa mythbusters misconceptions myths truths structures" },
+    { title: "Algorithm Arena", url: "/pages/tools/algorithm-arena/algorithm-arena.html", category: "Tools", keywords: "algorithm arena battle code competition challenges game math" },
+    { title: "Algorithms in Real Apps", url: "/pages/tools/everyday-apps/everyday-apps.html", category: "Tools", keywords: "algorithms in real apps everyday applications autocomplete search GPS database index" },
+    { title: "Weakness Dashboard", url: "/pages/tools/topic-weakness-dashboard/topic-weakness-dashboard.html", category: "Tools", keywords: "weakness dashboard stats tracking progress score card review recommendations" },
+
+    // Editors
+    { title: "Python Editor", url: "/pages/editors/python-editor/python-editor.html", category: "Editors", keywords: "python editor compiler runner playground scratchpad" },
+    { title: "Java Editor", url: "/pages/editors/java-editor/java-editor.html", category: "Editors", keywords: "java editor compiler runner playground scratchpad" },
+    { title: "C++ Editor", url: "/pages/editors/cpp-editor/cpp-editor.html", category: "Editors", keywords: "c++ cpp editor compiler runner playground scratchpad" },
+    { title: "C Editor", url: "/pages/editors/c-editor/c-editor.html", category: "Editors", keywords: "c editor compiler runner playground scratchpad" },
+    { title: "PHP Editor", url: "/pages/editors/php-editor/php-editor.html", category: "Editors", keywords: "php editor compiler runner playground scratchpad" },
+    { title: "Ruby Editor", url: "/pages/editors/ruby-editor/ruby-editor.html", category: "Editors", keywords: "ruby editor compiler runner playground scratchpad" },
+    { title: "Scala Editor", url: "/pages/editors/scala-editor/scala-editor.html", category: "Editors", keywords: "scala editor compiler runner playground scratchpad" },
+    { title: "Go Editor", url: "/pages/editors/go-editor/go-editor.html", category: "Editors", keywords: "go editor compiler runner playground scratchpad" },
+    { title: "HTML Editor", url: "/pages/editors/html-editor/html-editor.html", category: "Editors", keywords: "html css js editor preview iframe live design" },
+    { title: "SQL Editor", url: "/pages/editors/sql-editor/sql-editor.html", category: "Editors", keywords: "sql database editor query terminal tables sandbox" },
+    { title: "React Playground", url: "/pages/editors/react-playground/react-playground.html", category: "Editors", keywords: "react playground components live compile state props rendering sandbox" },
+    { title: "Code Playground", url: "/Playground/playground.html", category: "Editors", keywords: "code playground editor compiler runner multi language sandbox" },
+
+    // Career & Interview
+    { title: "DSA Cheat Sheets", url: "/pages/resources/cheat-sheets/cheat-sheets.html", category: "Interview", keywords: "dsa cheat sheets formula summary revision fast track reference" },
+    { title: "Interview Experiences", url: "/pages/interview/interview-experience/interview-experience.html", category: "Interview", keywords: "interview experiences faang reviews questions answers database" },
+    { title: "Interview Heatmap", url: "/pages/interview/interview-heatmap/interview-heatmap.html", category: "Interview", keywords: "interview heatmap tracking calendar schedule logs prep progress" },
+    { title: "Interview Mistakes", url: "/pages/interview/interview-mistakes/interview-mistakes.html", category: "Interview", keywords: "interview mistakes common errors bugs logic communication anti patterns" },
+
+    // Community & General
+    { title: "Discussions Forum", url: "/community", category: "Community", keywords: "discussions community threads replies topics comments questions share" },
+    { title: "Leaderboard / Dashboard", url: "/index.html#dashboard", category: "Community", keywords: "leaderboard dashboard ranking score points level user progress stats" },
+    { title: "Support Hub", url: "/support-page", category: "Community", keywords: "support page help desk tickets issues contact us details" },
+    { title: "Feedback", url: "/feedback", category: "Community", keywords: "feedback review suggestions bugs report improvements forms" },
+    { title: "About Us", url: "/pages/resources/about-us.html", category: "Community", keywords: "about us team mission story timeline contributors project information" },
+    { title: "FAQ", url: "/pages/resources/faq/faq.html", category: "Community", keywords: "faq frequently asked questions help answers troubleshooting guide" },
+    { title: "Blog", url: "/pages/resources/blog/blog.html", category: "Community", keywords: "blog articles news updates stories coding tips resources publications" }
+  ];
+
+  // Helper to escape regex special characters
+  const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Helper to highlight matching text in title
+  const highlightText = (text, query) => {
+    if (!query) return text;
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!tokens.length) return text;
+    let highlighted = text;
+    tokens.forEach(token => {
+      const regex = new RegExp(`(${escapeRegExp(token)})`, "gi");
+      highlighted = highlighted.replace(regex, `<mark class="search-highlight">$1</mark>`);
+    });
+    return highlighted;
+  };
+
+  searchInputs.forEach(input => {
+    const wrapper = input.closest(".nav-search");
+    if (!wrapper) return;
+    const clearBtn = wrapper.querySelector(".clear-search-btn");
+    const dropdown = wrapper.querySelector(".search-dropdown");
+    let activeSuggestionIndex = -1;
+
+    // Load recent searches and frequently visited from localStorage
+    const getRecentSearches = () => {
+      try {
+        return JSON.parse(localStorage.getItem("nav_recent_searches")) || [];
+      } catch {
+        return [];
+      }
+    };
+
+    const addRecentSearch = (query) => {
+      if (!query || !query.trim()) return;
+      const cleanQuery = query.trim();
+      let recent = getRecentSearches();
+      recent = recent.filter(q => q.toLowerCase() !== cleanQuery.toLowerCase());
+      recent.unshift(cleanQuery);
+      if (recent.length > 5) recent.pop();
+      localStorage.setItem("nav_recent_searches", JSON.stringify(recent));
+    };
+
+    const removeRecentSearch = (query) => {
+      let recent = getRecentSearches();
+      recent = recent.filter(q => q !== query);
+      localStorage.setItem("nav_recent_searches", JSON.stringify(recent));
+    };
+
+    const getFrequentlyVisited = () => {
+      try {
+        const visited = JSON.parse(localStorage.getItem("nav_frequently_visited")) || {};
+        const sorted = Object.entries(visited)
+          .map(([url, count]) => {
+            const page = searchIndex.find(p => p.url === url);
+            return page ? { ...page, count } : null;
+          })
+          .filter(Boolean)
+          .sort((a, b) => b.count - a.count);
+        return sorted.slice(0, 5);
+      } catch {
+        return [];
+      }
+    };
+
+    const trackPageVisit = (url) => {
+      try {
+        const visited = JSON.parse(localStorage.getItem("nav_frequently_visited")) || {};
+        visited[url] = (visited[url] || 0) + 1;
+        localStorage.setItem("nav_frequently_visited", JSON.stringify(visited));
+      } catch (e) {
+        console.warn("Could not track page visit:", e);
+      }
+    };
+
+    const syncAllInputs = (value) => {
+      searchInputs.forEach(inp => {
+        if (inp.value !== value) {
+          inp.value = value;
+          const wrp = inp.closest(".nav-search");
+          if (wrp) {
+            const clr = wrp.querySelector(".clear-search-btn");
+            if (clr) clr.style.display = value ? "flex" : "none";
+          }
+        }
+      });
+    };
+
+    const renderDropdown = (query = "") => {
+      if (!dropdown) return;
+      dropdown.innerHTML = "";
+      activeSuggestionIndex = -1;
+
+      if (!query.trim()) {
+        const recent = getRecentSearches();
+        const popular = getFrequentlyVisited();
+
+        const defaultPopular = [
+          { title: "DSA Cheat Sheets", url: "/cheat-sheets.html", category: "Interview" },
+          { title: "Practice Problems", url: "/index.html#practice", category: "Learn" },
+          { title: "Sorting Visualizer", url: "/sorting-visualizer.html", category: "Visualizers" },
+          { title: "Assessments", url: "/quiz-system.html", category: "Learn" },
+          { title: "Learning Path Generator", url: "/personalized-learning-path.html", category: "Editors" }
+        ];
+
+        const popularList = popular.length ? popular : defaultPopular.slice(0, 5);
+        let hasContent = false;
+
+        if (recent.length) {
+          hasContent = true;
+          const section = document.createElement("div");
+          section.className = "search-dropdown-section";
+          section.innerHTML = `<div class="search-section-title">Recent Searches</div>`;
+
+          recent.forEach(q => {
+            const item = document.createElement("div");
+            item.className = "recent-item";
+            
+            const link = document.createElement("a");
+            link.className = "recent-link";
+            link.innerHTML = `<i class="fas fa-history"></i><span>${escapeHtml(q)}</span>`;
+            link.addEventListener("click", (e) => {
+              e.preventDefault();
+              syncAllInputs(q);
+              renderDropdown(q);
+            });
+
+            const removeBtn = document.createElement("button");
+            removeBtn.className = "remove-recent-btn";
+            removeBtn.setAttribute("aria-label", "Remove from history");
+            removeBtn.innerHTML = `<i class="fas fa-trash-can"></i>`;
+            removeBtn.addEventListener("click", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              removeRecentSearch(q);
+              renderDropdown();
+            });
+
+            item.appendChild(link);
+            item.appendChild(removeBtn);
+            section.appendChild(item);
+          });
+          dropdown.appendChild(section);
+        }
+
+        if (popularList.length) {
+          hasContent = true;
+          const section = document.createElement("div");
+          section.className = "search-dropdown-section";
+          section.innerHTML = `<div class="search-section-title">${popular.length ? "Frequently Visited" : "Popular Pages"}</div>`;
+
+          popularList.forEach(page => {
+            const link = document.createElement("a");
+            link.href = page.url;
+            link.className = "suggestion-item";
+            link.innerHTML = `
+              <div class="suggestion-content">
+                <span class="suggestion-title">${escapeHtml(page.title)}</span>
+                <span class="suggestion-path">Navigation &gt; ${escapeHtml(page.category)}</span>
+              </div>
+              <span class="suggestion-badge">${escapeHtml(page.category)}</span>
+              <i class="fas fa-chevron-right suggestion-arrow"></i>
+            `;
+            link.addEventListener("click", () => {
+              trackPageVisit(page.url);
+              addRecentSearch(page.title);
+            });
+            section.appendChild(link);
+          });
+          dropdown.appendChild(section);
+        }
+
+        dropdown.style.display = hasContent ? "block" : "none";
+        return;
+      }
+
+      const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+      const matches = searchIndex.filter(item => {
+        const titleMatch = tokens.every(tok => item.title.toLowerCase().includes(tok));
+        const catMatch = tokens.every(tok => item.category.toLowerCase().includes(tok));
+        const keywordMatch = tokens.every(tok => item.keywords.toLowerCase().includes(tok));
+        return titleMatch || catMatch || keywordMatch;
+      });
+
+      if (!matches.length) {
+        dropdown.innerHTML = `
+          <div class="search-no-results">
+            <i class="fas fa-triangle-exclamation"></i>
+            <span>No results found for "${escapeHtml(query)}"</span>
+          </div>
+        `;
+        dropdown.style.display = "block";
+        return;
+      }
+
+      const section = document.createElement("div");
+      section.className = "search-dropdown-section";
+      section.innerHTML = `<div class="search-section-title">Matches (${matches.length})</div>`;
+
+      matches.forEach(page => {
+        const link = document.createElement("a");
+        link.href = page.url;
+        link.className = "suggestion-item";
+        link.innerHTML = `
+          <div class="suggestion-content">
+            <span class="suggestion-title">${highlightText(page.title, query)}</span>
+            <span class="suggestion-path">Navigation &gt; ${escapeHtml(page.category)}</span>
+          </div>
+          <span class="suggestion-badge">${escapeHtml(page.category)}</span>
+          <i class="fas fa-chevron-right suggestion-arrow"></i>
+        `;
+        link.addEventListener("click", () => {
+          trackPageVisit(page.url);
+          addRecentSearch(page.title);
+        });
+        section.appendChild(link);
+      });
+      dropdown.appendChild(section);
+      dropdown.style.display = "block";
+    };
+
+    const escapeHtml = (unsafe) => {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    };
+
+    input.addEventListener("input", (e) => {
+      const val = e.target.value;
+      syncAllInputs(val);
+      renderDropdown(val);
+    });
+
+    input.addEventListener("focus", () => {
+      setTimeout(() => {
+        renderDropdown(input.value);
+      }, 150);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!wrapper.contains(e.target)) {
+        dropdown.style.display = "none";
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        syncAllInputs("");
+        renderDropdown();
+        input.focus();
+      });
+    }
+
+    input.addEventListener("keydown", (e) => {
+      const items = dropdown.querySelectorAll(".suggestion-item, .recent-item, .recent-link");
+      if (!items.length) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
+        updateSelectedSuggestion(items);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
+        updateSelectedSuggestion(items);
+      } else if (e.key === "Enter") {
+        if (activeSuggestionIndex >= 0 && activeSuggestionIndex < items.length) {
+          e.preventDefault();
+          items[activeSuggestionIndex].click();
+        } else if (items.length > 0) {
+          e.preventDefault();
+          items[0].click();
+        }
+      } else if (e.key === "Escape") {
+        dropdown.style.display = "none";
+        input.blur();
+      }
+    });
+
+    const updateSelectedSuggestion = (items) => {
+      items.forEach((item, index) => {
+        if (index === activeSuggestionIndex) {
+          item.classList.add("selected");
+          item.focus();
+          item.scrollIntoView({ block: "nearest" });
+        } else {
+          item.classList.remove("selected");
+        }
+      });
+      input.focus();
+    };
   });
 }
 
@@ -955,6 +1376,131 @@ function updateLevelProgress() {
   if (progressBarSection) progressBarSection.style.width = progressPercent + "%";
   const progressLabelSection = document.getElementById("profileLevelProgressSection");
   if (progressLabelSection) progressLabelSection.textContent = Math.round(progressPercent) + "%";
+}
+
+// ============================================
+// BACK TO TOP BUTTON
+// ============================================
+
+/**
+ * Initialize Back to Top button functionality
+ */
+function initBackToTop() {
+    const backToTopBtn = document.getElementById('backToTop');
+    if (!backToTopBtn) return;
+
+    let isVisible = false;
+    let scrollTimeout;
+    let progressRing = backToTopBtn.querySelector('.progress-ring-fill');
+
+    /**
+     * Check scroll position and toggle button visibility
+     */
+    function toggleBackToTop() {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const shouldShow = scrollY > 300;
+
+        if (shouldShow && !isVisible) {
+            backToTopBtn.classList.add('visible');
+            isVisible = true;
+            updateProgressRing(scrollY);
+        } else if (!shouldShow && isVisible) {
+            backToTopBtn.classList.remove('visible');
+            isVisible = false;
+        } else if (shouldShow && isVisible) {
+            updateProgressRing(scrollY);
+        }
+    }
+
+    /**
+     * Update progress ring (optional enhancement)
+     */
+    function updateProgressRing(scrollY) {
+        if (!progressRing) {
+            progressRing = backToTopBtn.querySelector('.progress-ring-fill');
+            if (!progressRing) return;
+        }
+
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? (scrollY / maxScroll) * 100 : 0;
+        const circumference = 2 * Math.PI * 20;
+        const offset = circumference - (progress / 100) * circumference;
+        
+        progressRing.style.strokeDasharray = circumference;
+        progressRing.style.strokeDashoffset = offset;
+    }
+
+    /**
+     * Scroll to top smoothly
+     */
+    function scrollToTop() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            window.scrollTo(0, 0);
+            updateProgressRing(0);
+            return;
+        }
+
+        const startY = window.scrollY || window.pageYOffset;
+        const duration = 500;
+        const startTime = performance.now();
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function animateScroll(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeInOutCubic(progress);
+            
+            window.scrollTo(0, startY * (1 - easedProgress));
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+            }
+        }
+
+        requestAnimationFrame(animateScroll);
+        
+        setTimeout(() => {
+            updateProgressRing(0);
+        }, duration + 100);
+    }
+
+    // Throttled scroll listener
+    function throttledScroll() {
+        if (scrollTimeout) {
+            cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = requestAnimationFrame(toggleBackToTop);
+    }
+
+    // Event listeners
+    window.addEventListener('scroll', throttledScroll, { passive: true });
+    window.addEventListener('resize', throttledScroll, { passive: true });
+
+    // Click handler
+    backToTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        scrollToTop();
+    });
+
+    // Keyboard support
+    backToTopBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'Space') {
+            e.preventDefault();
+            scrollToTop();
+        }
+    });
+
+    // Touch support for mobile
+    backToTopBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        scrollToTop();
+    }, { passive: false });
+
+    // Initial check
+    toggleBackToTop();
 }
 
 // ============================================
@@ -1069,6 +1615,10 @@ function openTopicModal(topic) {
         if (match) openQuizEditor(match);
       }, 600);
     };
+  }
+  const modalCloseBtn = document.getElementById("modalClose");
+  if (modalCloseBtn) {
+    modalCloseBtn.onclick = () => closeTopicModal();
   }
   modal.classList.add("active");
 }
@@ -2673,6 +3223,10 @@ function openQuizEditor(problem) {
   const outputIcon = document.getElementById('outputToggleIcon');
   if (outputPanel) outputPanel.classList.remove('collapsed');
   if (outputIcon) { outputIcon.classList.remove('fa-chevron-up'); outputIcon.classList.add('fa-chevron-down'); }
+  const quizCloseBtn = document.getElementById("quizModalClose");
+  if (quizCloseBtn) {
+    quizCloseBtn.onclick = () => closeQuizEditor();
+  }
   modal.classList.add("active");
   updateLineNumbers();
   syncScroll();
@@ -2763,23 +3317,36 @@ function getDefaultCode(lang, problem) {
     return getClassTemplate(lang, problem);
   }
 
+  const hasNullableInt = problem.testCases?.some(tc =>
+    tc.input.some(v => Array.isArray(v) && v.some(x => x === null || x === undefined))
+  );
+
   const paramTypes = tc?.input ? tc.input.map(v => mapType(j2t(v), lang)) : [];
   const retType = tc?.expected !== undefined ? mapType(j2t(tc.expected), lang) : 'auto';
 
+  const cppIntType = hasNullableInt ? 'vector<optional<int>>' : 'vector<int>';
+
   const paramStr = params.length
     ? params.map((p, i) => {
-        const t = paramTypes[i] || 'auto';
-        if (lang === 'cpp') return t + ' ' + p;
+        let t = paramTypes[i] || 'auto';
+        if (lang === 'cpp') {
+          if (t === 'vector<int>' && hasNullableInt) t = cppIntType;
+          return t + ' ' + p;
+        }
         if (lang === 'c') {
           const origJt = tc?.input ? j2t(tc.input[i]) : null;
           const is2d = origJt === 'int[][]';
           const isArray = origJt && origJt.endsWith('[]');
           if (is2d) return t + ' ' + p + ', int* ' + p + 'Sizes, int ' + p + 'Size';
+          if (isArray && hasNullableInt && origJt === 'int[]') return t + ' ' + p + ', int* ' + p + 'Valid, int ' + p + 'Size';
           if (isArray) return t + ' ' + p + ', int ' + p + 'Size';
           return t + ' ' + p;
         }
         if (lang === 'java') return t + ' ' + p;
-        if (lang === 'swift') return '_ ' + p + ': ' + t;
+        if (lang === 'swift') {
+          if (t === '[Int]' && hasNullableInt) t = '[Int?]';
+          return '_ ' + p + ': ' + t;
+        }
         return p;
       }).join(', ')
     : 'params';
@@ -2791,11 +3358,15 @@ function getDefaultCode(lang, problem) {
     docComment = lines.map(l => prefix + l).join('\n') + '\n';
   }
 
+  const cppDefaultIncludes = hasNullableInt
+    ? '#include <optional>\n#include <string>\n#include <stack>\n#include <climits>\nusing namespace std;\n\n'
+    : '#include <string>\n#include <stack>\nusing namespace std;\n\n';
+
   const templates = {
     javascript: docComment + "function " + fnName + "(" + (params.join(', ') || 'params') + ") {\n    \n}",
     python: docComment + "def " + fnName + "(" + (params.join(', ') || 'params') + "):\n    pass\n",
     java: "class Solution {\n" + docComment.replace(/^(.)/gm, '    $1') + "    public " + retType + " " + fnName + "(" + paramStr + ") {\n        \n    }\n}",
-    cpp: '#include <string>\n#include <stack>\nusing namespace std;\n\n' + docComment + retType + " " + fnName + "(" + paramStr + ") {\n    \n}",
+    cpp: cppDefaultIncludes + docComment + retType + " " + fnName + "(" + paramStr + ") {\n    \n}",
     c: '#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdbool.h>\n\n' + docComment + retType + " " + fnName + "(" + paramStr + ") {\n    \n}",
     swift: docComment + "func " + fnName + "(" + paramStr + ") -> " + retType + " {\n    \n}"
   };
@@ -2803,7 +3374,7 @@ function getDefaultCode(lang, problem) {
 }
 
 function generateExamples(problem) {
-  const examples = { 1: `<strong>Example 1:</strong><br>Input: nums = [2,7,11,15], target = 9<br>Output: [0,1]<br><br><strong>Follow-up:</strong> Can you solve it in O(n) using a Hash Map?`, 2: `<strong>Example 1:</strong><br>Input: s = "()"<br>Output: true<br><br><strong>Follow-up:</strong> Can you solve it in O(n) using a Stack?`, 3: `<strong>Example 1:</strong><br>Input: list1 = [1,2,4], list2 = [1,3,4]<br>Output: [1,1,2,3,4,4]<br><br><strong>Follow-up:</strong> Can you solve it both iteratively and recursively?`, 4: `<strong>Example 1:</strong><br>Input: nums = [-2,1,-3,4,-1,2,1,-5,4]<br>Output: 6<br><br><strong>Follow-up:</strong> Can you solve it using Kadane's Algorithm in O(n)?`, 6: `<strong>Example 1:</strong><br>Input: adjList = [[2,4],[1,3],[2,4],[1,3]]<br>Output: [[2,4],[1,3],[2,4],[1,3]]<br><br><strong>Follow-up:</strong> Can you solve it using both BFS and DFS approaches?`, 7: `<strong>Example 1:</strong><br>Input: nums = [10,9,2,5,3,7,101,18]<br>Output: 4<br><br><strong>Follow-up:</strong> Can you improve from O(n²) to O(n log n) using binary search?`, 9: `<strong>Example 1:</strong><br>Input: height = [0,1,0,2,1,0,1,3,2,1,2,1]<br>Output: 6<br><br><strong>Follow-up:</strong> Can you solve it in O(n) time and O(1) space using the two-pointer technique?`, 10: `<strong>Example 1:</strong><br>Input: head = [1,2,3,4,5]<br>Output: [5,4,3,2,1]<br><br><strong>Follow-up:</strong> Can you solve it both iteratively and recursively?`, 11: `<strong>Example 1:</strong><br>Input: root = [4,2,7,1,3,6,9]<br>Output: [4,7,2,9,6,3,1]<br><br><strong>Follow-up:</strong> Can you solve it both recursively and iteratively using a queue or stack?` };
+  const examples = { 1: `<strong>Example 1:</strong><br>Input: nums = [2,7,11,15], target = 9<br>Output: [0,1]<br><br><strong>Follow-up:</strong> Can you solve it in O(n) using a Hash Map?`, 2: `<strong>Example 1:</strong><br>Input: s = "()"<br>Output: true<br><br><strong>Follow-up:</strong> Can you solve it in O(n) using a Stack?`, 3: `<strong>Example 1:</strong><br>Input: list1 = [1,2,4], list2 = [1,3,4]<br>Output: [1,1,2,3,4,4]<br><br><strong>Follow-up:</strong> Can you solve it both iteratively and recursively?`, 4: `<strong>Example 1:</strong><br>Input: nums = [-2,1,-3,4,-1,2,1,-5,4]<br>Output: 6<br><br><strong>Follow-up:</strong> Can you solve it using Kadane's Algorithm in O(n)?`, 6: `<strong>Example 1:</strong><br>Input: adjList = [[2,4],[1,3],[2,4],[1,3]]<br>Output: [[2,4],[1,3],[2,4],[1,3]]<br><br><strong>Follow-up:</strong> Can you solve it using both BFS and DFS approaches?`, 7: `<strong>Example 1:</strong><br>Input: nums = [10,9,2,5,3,7,101,18]<br>Output: 4<br><br><strong>Follow-up:</strong> Can you improve from O(n²) to O(n log n) using binary search?`, 9: `<strong>Example 1:</strong><br>Input: height = [0,1,0,2,1,0,1,3,2,1,2,1]<br>Output: 6<br><br><strong>Follow-up:</strong> Can you solve it in O(n) time and O(1) space using the two-pointer technique?`, 10: `<strong>Example 1:</strong><br>Input: head = [1,2,3,4,5]<br>Output: [5,4,3,2,1]<br><br><strong>Follow-up:</strong> Can you solve it both iteratively and recursively?`, 11: `<strong>Example 1:</strong><br>Input: root = [4,2,7,1,3,6,9]<br>Output: [4,7,2,9,6,3,1]<br><br><strong>Follow-up:</strong> Can you solve it both recursively and iteratively using a queue or stack?`, 12: `<strong>Example 1:</strong><br>Input: root = [2,1,3]<br>Output: true<br><br><strong>Follow-up:</strong> Can you solve it without recursion using iterative inorder traversal?` };
   return examples[problem.id] || "<strong>Example:</strong><br>Solve this problem";
 }
 
@@ -2911,11 +3482,15 @@ function valToLit(v, t) {
 function genCppHarness(code, fn, tcs, isClass) {
   const outType = j2t(tcs[0].expected);
   const inTypes = tcs[0].input.map(v => j2t(v));
-  let s = '#include <iostream>\n#include <string>\n#include <vector>\n#include <sstream>\nusing namespace std;\n\n';
+  const hasNullableInt = inTypes.some(t => t === 'int[]') && tcs.some(tc => tc.input.some((v, i) => inTypes[i] === 'int[]' && Array.isArray(v) && v.some(x => x === null || x === undefined)));
+  let s = '#include <iostream>\n#include <string>\n#include <vector>\n' + (hasNullableInt ? '#include <optional>\n' : '') + '#include <sstream>\nusing namespace std;\n\n';
   s += code + '\n\n';
   s += 'string __j(bool v) { return v ? "true" : "false"; }\n';
   s += 'string __j(int v) { return to_string(v); }\n';
   s += 'string __j(const string& v) { return "\\"" + v + "\\""; }\n';
+  if (hasNullableInt) {
+    s += 'template<typename T>\nstring __j(const optional<T>& v) {\n  if (!v.has_value()) return "null";\n  return __j(v.value());\n}\n';
+  }
   s += 'template<typename T>\nstring __j(const vector<T>& v) {\n  if (v.empty()) return "[]";\n  stringstream ss;\n  ss << "[" << __j(v[0]);\n  for (size_t i=1;i<v.size();i++) ss << "," << __j(v[i]);\n  ss << "]";\n  return ss.str();\n}\n';
   s += 'int main() {\n  cout << "__RESULT__:";\n  cout << "[";\n';
   for (let i = 0; i < tcs.length; i++) {
@@ -2924,8 +3499,14 @@ function genCppHarness(code, fn, tcs, isClass) {
     let callArgs = '';
     for (let j = 0; j < inTypes.length; j++) {
       if (j > 0) callArgs += ', ';
-      if (inTypes[j] === 'int[]') callArgs += 'vector<int>{' + tcs[i].input[j].map(x => x === null || x === undefined ? 0 : x).join(',') + '}';
-      else if (inTypes[j] === 'int[][]') callArgs += 'vector<vector<int>>{' + tcs[i].input[j].map(row => '{' + row.join(',') + '}').join(',') + '}';
+      if (inTypes[j] === 'int[]') {
+        const vals = tcs[i].input[j];
+        if (hasNullableInt) {
+          callArgs += 'vector<optional<int>>{' + vals.map(x => x === null || x === undefined ? 'std::nullopt' : String(x)).join(',') + '}';
+        } else {
+          callArgs += 'vector<int>{' + vals.join(',') + '}';
+        }
+      } else if (inTypes[j] === 'int[][]') callArgs += 'vector<vector<int>>{' + tcs[i].input[j].map(row => '{' + row.join(',') + '}').join(',') + '}';
       else if (inTypes[j] === 'string[]') callArgs += 'vector<string>{' + tcs[i].input[j].map(x => '"' + String(x).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"').join(',') + '}';
       else if (inTypes[j] === 'string[][]') callArgs += 'vector<vector<string>>{' + tcs[i].input[j].map(row => '{' + row.map(x => '"' + String(x).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"').join(',') + '}').join(',') + '}';
       else callArgs += valToLit(tcs[i].input[j], inTypes[j]);
@@ -2934,7 +3515,13 @@ function genCppHarness(code, fn, tcs, isClass) {
     s += '    cout << "{\\"index\\":' + i + ',\\"ran\\":true,\\"passed\\":";\n';
     let compExpr = '"false"';
     if (outType === 'int[]') {
-      compExpr = '(__r == vector<int>{' + tcs[i].expected.map(x => x === null || x === undefined ? 0 : x).join(',') + '} ? "true" : "false")';
+      const exp = tcs[i].expected;
+      if (hasNullableInt) {
+        const expOpt = 'vector<optional<int>>{' + exp.map(x => x === null || x === undefined ? 'std::nullopt' : String(x)).join(',') + '}';
+        compExpr = '(__r == ' + expOpt + ' ? "true" : "false")';
+      } else {
+        compExpr = '(__r == vector<int>{' + exp.map(x => x === null || x === undefined ? 0 : x).join(',') + '} ? "true" : "false")';
+      }
     } else if (outType === 'int[][]') {
       compExpr = '(__r == vector<vector<int>>{' + tcs[i].expected.map(row => '{' + row.join(',') + '}').join(',') + '} ? "true" : "false")';
     } else if (outType === 'int') {
@@ -3005,6 +3592,7 @@ function genJavaHarness(code, fn, tcs, isClass) {
 function genCHarness(code, fn, tcs, isClass) {
   const outType = j2t(tcs[0].expected);
   const inTypes = tcs[0].input.map(v => j2t(v));
+  const hasNullableInt = inTypes.some(t => t === 'int[]') && tcs.some(tc => tc.input.some((v, i) => inTypes[i] === 'int[]' && Array.isArray(v) && v.some(x => x === null || x === undefined)));
   let s = '#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdbool.h>\n\n';
   s += code + '\n\n';
   if (outType === 'int[]') {
@@ -3025,9 +3613,13 @@ function genCHarness(code, fn, tcs, isClass) {
       if (inTypes[j] === 'int[]') {
         const arr = tcs[i].input[j];
         if (arr.length === 0) {
-          callArgs += 'NULL, 0';
+          callArgs += hasNullableInt ? 'NULL, NULL, 0' : 'NULL, 0';
+        } else if (hasNullableInt) {
+          const vals = arr.map(x => x === null || x === undefined ? 0 : x);
+          const valid = arr.map(x => x === null || x === undefined ? 0 : 1);
+          callArgs += '(int[]){' + vals.join(',') + '}, (int[]){' + valid.join(',') + '}, ' + arr.length;
         } else {
-          callArgs += '(int[]){' + arr.map(x => x).join(',') + '}, ' + arr.length;
+          callArgs += '(int[]){' + arr.join(',') + '}, ' + arr.length;
         }
       } else if (inTypes[j] === 'int[][]') {
         const arr = tcs[i].input[j];
@@ -3103,11 +3695,15 @@ function genCHarness(code, fn, tcs, isClass) {
 function genSwiftHarness(code, fn, tcs, isClass) {
   const outType = j2t(tcs[0].expected);
   const inTypes = tcs[0].input.map(v => j2t(v));
+  const hasNullableInt = inTypes.some(t => t === 'int[]') && tcs.some(tc => tc.input.some((v, i) => inTypes[i] === 'int[]' && Array.isArray(v) && v.some(x => x === null || x === undefined)));
   let s = 'import Foundation\n\n';
   s += code + '\n\n';
   s += 'func __j(_ v: Int) -> String { return String(v) }\n';
   s += 'func __j(_ v: Bool) -> String { return v ? "true" : "false" }\n';
   s += 'func __j(_ v: String) -> String { return "\\"\\(v)\\"" }\n';
+  if (hasNullableInt) {
+    s += 'func __j(_ v: [Int?]) -> String {\n  return "[" + v.map { $0.map(String.init) ?? "null" }.joined(separator: ",") + "]"\n}\n';
+  }
   if (outType === 'int[]' || outType === 'int[][]') {
     s += 'func __j(_ v: [Int]) -> String {\n  if v.isEmpty { return "[]" }\n  return "[" + v.map(String.init).joined(separator: ",") + "]"\n}\n';
   }
@@ -3121,8 +3717,13 @@ function genSwiftHarness(code, fn, tcs, isClass) {
     let callArgs = '';
     for (let j = 0; j < inTypes.length; j++) {
       if (j > 0) callArgs += ', ';
-      if (inTypes[j] === 'int[]') callArgs += '[' + tcs[i].input[j].map(x => x === null || x === undefined ? 0 : x).join(',') + '] as [Int]';
-      else if (inTypes[j] === 'int[][]') callArgs += '[' + tcs[i].input[j].map(row => '[' + row.join(',') + ']').join(',') + '] as [[Int]]';
+      if (inTypes[j] === 'int[]') {
+        if (hasNullableInt) {
+          callArgs += '[' + tcs[i].input[j].map(x => x === null || x === undefined ? 'nil' : String(x)).join(',') + '] as [Int?]';
+        } else {
+          callArgs += '[' + tcs[i].input[j].join(',') + '] as [Int]';
+        }
+      } else if (inTypes[j] === 'int[][]') callArgs += '[' + tcs[i].input[j].map(row => '[' + row.join(',') + ']').join(',') + '] as [[Int]]';
       else if (inTypes[j] === 'string[]') callArgs += '[' + tcs[i].input[j].map(x => '"' + String(x).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"').join(',') + '] as [String]';
       else if (inTypes[j] === 'string[][]') callArgs += '[' + tcs[i].input[j].map(row => '[' + row.map(x => '"' + String(x).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"').join(',') + ']').join(',') + '] as [[String]]';
       else callArgs += valToLit(tcs[i].input[j], inTypes[j]);
@@ -3167,7 +3768,6 @@ const API_BASE = (location.hostname === 'localhost' || location.hostname === '12
   : '';
 
 async function executeViaApi(lang, code, originalCode) {
-  // Make sure this points to your new secure Node.js route
   const response = await fetch(`${API_BASE}/api/execute`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -3189,10 +3789,9 @@ async function executeViaApi(lang, code, originalCode) {
     throw new Error(result.message || "Execution failed");
   }
 
-  // JDoodle returns output directly
   return { 
     stdout: result.data.output || "", 
-    stderr: "", // JDoodle merges stderr into output
+    stderr: "",
     memory: result.data.memory,
     cpuTime: result.data.cpuTime
   };
@@ -3214,6 +3813,23 @@ function parseTestResults(stdout, testCount) {
   return { allPassed: false, testResults: Array(testCount).fill({ ran: false, passed: false, error: "No test result marker found" }), rawOutput: stdout };
 }
 
+function executeJS(code) {
+  const logs = [];
+  const origLog = console.log;
+  console.log = function(...args) {
+    logs.push(args.map(String).join(" "));
+  };
+  try {
+    const result = (0, eval)(code);
+    if (result !== undefined) logs.push(String(result));
+    return { success: true, stdout: logs.join("\n") };
+  } catch (e) {
+    return { success: false, stdout: logs.join("\n"), error: e.message };
+  } finally {
+    console.log = origLog;
+  }
+}
+
 async function executeCode(code, lang, problem) {
   const testCases = generateTestCases(problem);
   if (!testCases || testCases.length === 0) {
@@ -3226,30 +3842,29 @@ async function executeCode(code, lang, problem) {
   let stdout = "", stderr = "", memory = "", cpuTime = "";
   
   try {
-    const result = await executeViaApi(lang, harnessCode, code);
-    stdout = result.stdout;
-    memory = result.memory;
-    cpuTime = result.cpuTime;
-  } catch (e) {
-    if (lang === "javascript" && isAiInterviewerActive) {
-      try {
-        const { executeSandboxedCode } = await import('./modules/code-executor.js');
-        const logs = await executeSandboxedCode(harnessCode, 5000);
-        stdout = logs.join("\n");
-      } catch (sandboxErr) {
+    if (lang === "javascript") {
+      const jsResult = executeJS(harnessCode);
+      if (jsResult.success) {
+        stdout = jsResult.stdout;
+      } else {
         return { 
           allPassed: false, 
-          testResults: testCases.map(() => ({ ran: false, passed: false, error: sandboxErr.message })), 
-          rawOutput: sandboxErr.message 
+          testResults: testCases.map(() => ({ ran: false, passed: false, error: jsResult.error })), 
+          rawOutput: jsResult.stdout + "\n" + jsResult.error 
         };
       }
     } else {
-      return { 
-        allPassed: false, 
-        testResults: testCases.map(() => ({ ran: false, passed: false, error: e.message })), 
-        rawOutput: e.message 
-      };
+      const result = await executeViaApi(lang, harnessCode, code);
+      stdout = result.stdout;
+      memory = result.memory;
+      cpuTime = result.cpuTime;
     }
+  } catch (e) {
+    return { 
+      allPassed: false, 
+      testResults: testCases.map(() => ({ ran: false, passed: false, error: e.message })), 
+      rawOutput: e.message 
+    };
   }
   
   const parsedResults = parseTestResults(stdout, testCases.length);
@@ -3258,6 +3873,24 @@ async function executeCode(code, lang, problem) {
     memory: memory || "N/A",
     cpuTime: cpuTime || "N/A"
   };
+
+  if (lang === 'javascript') {
+    if (typeof window.analyzeComplexity !== 'function') {
+      await new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'modules/complexity-client.js';
+        script.onload = resolve;
+        script.onerror = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    if (typeof window.analyzeComplexity === 'function') {
+      const complexity = await window.analyzeComplexity(code);
+      if (complexity) {
+        parsedResults.metrics.complexity = complexity;
+      }
+    }
+  }
   
   return parsedResults;
 }
@@ -3307,9 +3940,11 @@ async function runQuizCode() {
       setOutput(out, "error");
     }
     if (result.metrics && result.metrics.cpuTime) {
-      const metricText = `\n\n⏱️ Execution Time: ${result.metrics.cpuTime} sec\n💾 Memory Used: ${result.metrics.memory} KB`;
+      let metricText = `\n\n⏱️ Execution Time: ${result.metrics.cpuTime} sec\n💾 Memory Used: ${result.metrics.memory} KB`;
+      if (result.metrics.complexity) {
+        metricText += `\n📊 Time Complexity: ${result.metrics.complexity}`;
+      }
       const el = document.getElementById("quizOutputContent");
-      if (el) el.innerHTML += `<pre style="color:var(--accent); margin-top:10px;">${metricText}</pre>`;
       if (el) {
         const metricsEl = document.createElement("pre");
         metricsEl.style.color = "var(--accent)";
@@ -3501,6 +4136,22 @@ function toggleOutputPanel() {
   panel.classList.toggle('collapsed');
   if (icon) { if (panel.classList.contains('collapsed')) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); } else { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); } }
 }
+
+(function bindOutputToggle() {
+  function bind() {
+    const header = document.getElementById('outputHeader');
+    if (header && !header._bound) {
+      header.addEventListener('click', toggleOutputPanel);
+      header._bound = true;
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind);
+  } else {
+    bind();
+  }
+  new MutationObserver(bind).observe(document.body, { childList: true, subtree: true });
+})();
 
 // ============================================
 // CODING PERSONALITY
@@ -4830,3 +5481,316 @@ window.addEventListener('load', () => {
     window.syncSpacedRepetitionDown();
   }
 });
+
+// ============================================
+// PROBLEM FILTERING WITH CORRECT COUNT
+// ============================================
+
+/**
+ * Get selected difficulty from filter buttons
+ * @returns {string} Selected difficulty ('all', 'easy', 'medium', 'hard')
+ */
+function getSelectedDifficulty() {
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        return activeFilter.dataset.filter || 'all';
+    }
+    return 'all';
+}
+
+/**
+ * Update the problem count display
+ * @param {Array} filteredProblems - Array of filtered problems
+ */
+function updateProblemCount(filteredProblems) {
+    // Update visible count
+    const visibleCountEl = document.getElementById('visible-count');
+    if (visibleCountEl) {
+        const total = filteredProblems.length;
+        visibleCountEl.textContent = total;
+    }
+    
+    // Update total count (if separate)
+    const totalCountEl = document.getElementById('total-count');
+    if (totalCountEl) {
+        // This should show total problems before filtering
+        const allProblems = getAllProblems();
+        totalCountEl.textContent = allProblems.length;
+    }
+    
+    // Update the problem count display (legacy)
+    const countElement = document.querySelector('.problem-count');
+    if (countElement) {
+        const total = filteredProblems.length;
+        countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
+    }
+    
+    // Show/hide empty state
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) {
+        if (filteredProblems.length === 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Get all problems (from your data source)
+ * @returns {Array} All practice problems
+ */
+function getAllProblems() {
+    // Use your existing problems data
+    return practiceProblems || window.practiceProblems || [];
+}
+
+/**
+ * Filter problems based on selected difficulty
+ * @param {string} difficulty - 'all', 'easy', 'medium', 'hard'
+ * @param {Array} problems - Problems to filter
+ * @returns {Array} Filtered problems
+ */
+function filterProblemsByDifficulty(difficulty, problems) {
+    if (difficulty === 'all') {
+        return problems;
+    }
+    return problems.filter(problem => 
+        problem.difficulty.toLowerCase() === difficulty.toLowerCase()
+    );
+}
+
+/**
+ * Main filter function - handles filtering AND count update
+ */
+function filterProblems() {
+    const selectedDifficulty = getSelectedDifficulty();
+    const allProblems = getAllProblems();
+    
+    // Filter problems
+    const filtered = filterProblemsByDifficulty(selectedDifficulty, allProblems);
+    
+    // Render filtered problems
+    renderProblems(filtered);
+    
+    // Update count
+    updateProblemCount(filtered);
+    
+    // Update URL hash if needed (for bookmarking)
+    if (selectedDifficulty !== 'all') {
+        window.location.hash = `filter=${selectedDifficulty}`;
+    }
+}
+
+/**
+ * Get filter from URL hash on page load
+ */
+const VALID_PROBLEM_FILTERS = new Set(['all', 'easy', 'medium', 'hard', 'favorites']);
+
+function getFilterFromURL() {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const filter = params.get('filter') || 'all';
+    return VALID_PROBLEM_FILTERS.has(filter) ? filter : 'all';
+}
+
+/**
+ * Apply filter on page load from URL
+ */
+function applyFilterFromURL() {
+    const filter = getFilterFromURL();
+    if (filter !== 'all') {
+        const filterBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+        if (filterBtn) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            filterBtn.classList.add('active');
+        }
+    }
+    filterProblems();
+}
+
+// ============================================
+// RENDER PROBLEMS WITH COUNT UPDATE
+// ============================================
+
+const originalRenderProblems = window.renderProblems;
+if (typeof originalRenderProblems === 'function') {
+    window.renderProblems = function(problems) {
+        originalRenderProblems.call(this, problems);
+    };
+}
+
+// ============================================
+// COMPLETE FILTER IMPLEMENTATION
+// ============================================
+
+// Initialize filter buttons on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize filter buttons
+    initFilterButtons();
+    
+    // Apply filter from URL if any
+    applyFilterFromURL();
+    
+    // Initial render
+    filterProblems();
+});
+
+/**
+ * Initialize filter buttons with event listeners
+ */
+function initFilterButtons() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach((btn) => {
+        btn.addEventListener('click', function() {
+            filterButtons.forEach((b) => {
+                const isActive = b === this;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-pressed', String(isActive));
+            });
+            
+            // Reset pagination to page 1
+            currentPage = 1;
+            
+            // Filter and render
+            filterProblems();
+        });
+    });
+    
+    // Clear filters button
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', function() {
+            // Reset to 'all'
+            filterButtons.forEach((b) => b.classList.remove('active'));
+            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+            if (allBtn) allBtn.classList.add('active');
+            
+            // Clear search
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                currentSearch = '';
+            }
+            
+            // Reset and render
+            currentPage = 1;
+            filterProblems();
+        });
+    }
+}
+
+/**
+ * Get selected difficulty from active filter button
+ */
+function getSelectedDifficulty() {
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        return activeFilter.dataset.filter || 'all';
+    }
+    return 'all';
+}
+
+/**
+ * Get all problems
+ */
+function getAllProblems() {
+    return practiceProblems || [];
+}
+
+/**
+ * Filter problems by difficulty
+ */
+function filterProblemsByDifficulty(difficulty, problems) {
+    if (difficulty === 'all') {
+        return problems;
+    }
+    if (difficulty === 'favorites') {
+        return problems.filter(p => userProgress.favoriteProblems.includes(p.id));
+    }
+    return problems.filter(problem => 
+        problem.difficulty.toLowerCase() === difficulty.toLowerCase()
+    );
+}
+
+/**
+ * Filter problems with search and difficulty
+ */
+function filterProblems() {
+    const selectedDifficulty = getSelectedDifficulty();
+    const allProblems = getAllProblems();
+    const searchTerm = currentSearch || '';
+    
+    // Filter by difficulty
+    let filtered = filterProblemsByDifficulty(selectedDifficulty, allProblems);
+    
+    // Filter by search term
+    if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(problem => 
+            problem.title.toLowerCase().includes(term) ||
+            problem.tags.some(tag => tag.toLowerCase().includes(term)) ||
+            (problem.description && problem.description.toLowerCase().includes(term))
+        );
+    }
+    
+    // Update count
+    updateProblemCount(filtered);
+    
+    // Render with pagination
+    renderProblemsWithPagination(filtered);
+}
+
+/**
+ * Render problems with pagination
+ */
+function renderProblemsWithPagination(filteredProblems) {
+    const totalProblems = filteredProblems.length;
+    const totalPages = Math.max(1, Math.ceil(totalProblems / PROBLEMS_PER_PAGE));
+    
+    if (currentPage > totalPages) currentPage = totalPages;
+    
+    const start = (currentPage - 1) * PROBLEMS_PER_PAGE;
+    const end = Math.min(start + PROBLEMS_PER_PAGE, totalProblems);
+    const pageProblems = filteredProblems.slice(start, end);
+    
+    // Render the problems
+    renderProblems(pageProblems);
+    
+    // Update pagination
+    updatePaginationControls(currentPage, totalPages);
+}
+
+/**
+ * Update problem count display
+ */
+function updateProblemCount(filteredProblems) {
+    const total = filteredProblems.length;
+    const visibleCountEl = document.getElementById('visible-count');
+    const totalCountEl = document.getElementById('total-count');
+    const problemLabel = document.getElementById('problem-label');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (visibleCountEl) {
+        visibleCountEl.textContent = total;
+    }
+    
+    if (totalCountEl) {
+        const allProblems = getAllProblems();
+        totalCountEl.textContent = allProblems.length;
+    }
+    
+    if (problemLabel) {
+        problemLabel.textContent = total === 1 ? 'problem' : 'problems';
+    }
+    
+    if (emptyState) {
+        emptyState.classList.toggle('hidden', total !== 0);
+    }
+    
+    // Legacy support
+    const countElement = document.querySelector('.problem-count');
+    if (countElement) {
+        countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
+    }
+}

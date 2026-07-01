@@ -68,6 +68,7 @@
       })();
     </script>
 </head>
+  
   <body data-page="index">
     <!-- Skip to main content (accessibility) -->
     <a href="#main" class="skip-link">Skip to content</a>
@@ -96,6 +97,20 @@
     <!-- Scroll to Top Button -->
     <button id="scrollTopBtn" aria-label="Scroll to top" class="scroll-top-btn">
       <i class="fas fa-circle-chevron-up"></i>
+    </button>
+
+    <!-- Back to Top Button -->
+    <button 
+        id="backToTop" 
+        class="back-to-top" 
+        aria-label="Back to top"
+        title="Scroll back to top"
+    >
+        <svg class="progress-ring" viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="progress-ring-bg" cx="22" cy="22" r="20"/>
+            <circle class="progress-ring-fill" cx="22" cy="22" r="20"/>
+        </svg>
+        <i class="fas fa-arrow-up"></i>
     </button>
 
     <!-- Navigation Bar (loaded from partial) -->
@@ -224,10 +239,17 @@
             </button>
           </div>
         </div>
+
+        <!-- UPDATED: Problem Counter Container -->
         <div class="problem-counter-container" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-          <div>
-            Showing <span id="visible-count">0</span> of
-            <span id="total-count">0</span> Problems
+          <div class="problem-stats">
+            <span class="problem-count-display">
+              Showing <strong id="visible-count">0</strong> 
+              <span id="problem-label">problems</span>
+              <span class="total-count-display">
+                (Total: <span id="total-count">0</span>)
+              </span>
+            </span>
           </div>
           <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <!-- Debounce and abort options -->
@@ -250,7 +272,19 @@
           </div>
           <p id="ai-recommend-status" class="sr-only" aria-live="polite"></p>
         </div>
+
+        <!-- Problems Grid -->
         <div class="problems-grid"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+            <i class="fas fa-search"></i>
+            <h3>No problems found</h3>
+            <p>Try adjusting your filters or search terms</p>
+            <button class="btn btn-secondary" id="clearFiltersBtn">
+                <i class="fas fa-undo"></i> Clear Filters
+            </button>
+        </div>
 
         <!-- Pagination Controls -->
          <div class="pagination-controls" id="paginationControls">
@@ -264,6 +298,7 @@
            </div>
       </div>
     </section>
+    
     <!-- DSA Flashcards Revision Section -->
     <section id="flashcards" class="section flashcards-section">
       <div class="container">
@@ -1442,9 +1477,16 @@
                   <span aria-label="Submit shortcut: Control plus S"><kbd>Ctrl</kbd>+<kbd>S</kbd><span class="shortcut-label"> Submit</span></span>
                 </div>
                 <div class="output-panel" id="outputPanel">
-                  <div class="output-header" onclick="toggleOutputPanel()">
+                  <button
+                    type="button"
+                    class="output-header"
+                    id="outputHeader"
+                    aria-controls="quizOutputContent"
+                    aria-expanded="true"
+                  >
                     <span>Output</span>
                     <i class="fas fa-chevron-down" id="outputToggleIcon"></i>
+                  </button>
                   </div>
                   <div class="output-content" id="quizOutputContent">
                     <p class="output-placeholder">
@@ -1457,8 +1499,8 @@
           </div>
         </div>
         <div class="quiz-modal-footer">
-          <div class="quiz-actions" style="display:flex; justify-content:space-between; align-items:center; width:100%; gap: 1rem; flex-wrap: wrap;">
-            <div style="display:flex; gap:0.5rem;">
+          <div class="quiz-actions" style="display:flex; justify-content:flex-end; align-items:center; width:100%; gap: 1rem; flex-wrap: wrap;">
+            <div style="display:flex; gap:0.5rem; margin-left: auto;">
               <button class="btn btn-outline" onclick="runQuizCode()">
                 <i class="fas fa-play"></i> Run
               </button>
@@ -1956,7 +1998,7 @@
     <script src="timer.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="utils/searchEngine.js"></script>
-    <script src="modules/domSanitizer.js"></script>
+    <script type="module" src="modules/domSanitizer.js"></script>
     <script src="script.js"></script>
     <script src="theme.js"></script>
     <script src="auth-gate.js"></script>
@@ -1984,11 +2026,29 @@
     </div>
 </div>
 
+<!-- Back to Top Button -->
+<button 
+    id="backToTop" 
+    class="back-to-top" 
+<!-- Back to Top Button -->
+<button 
+    id="backToTop" 
+    class="back-to-top" 
+    aria-label="Back to top"
+    title="Scroll back to top"
+>
+    <svg class="progress-ring" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="20"></circle>
+        <circle class="progress-ring-fill" cx="22" cy="22" r="20"></circle>
+    </svg>
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</button>
 <!-- Footer Shortcut Trigger -->
 <footer>
     <button onclick="openShortcutModal()" style="background:none; border:none; color:#6b7280; cursor:pointer; text-decoration:underline;">
         ⌨️ Keyboard Shortcuts
     </button>
 </footer>
+
   </body>
 </html>
