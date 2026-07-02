@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `algo-infinity-verse-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `algo-infinity-verse-dynamic-${CACHE_VERSION}`;
 
@@ -28,14 +28,19 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
+  function tryCache(request, response, cacheName) {
+    try {
+      const cloned = response.clone();
+      caches.open(cacheName).then((cache) => cache.put(request, cloned)).catch(() => {});
+    } catch (e) {}
+  }
+
   // NAVIGATION
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
-          if (isCacheable(res)) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
-          }
+          if (isCacheable(res)) tryCache(event.request, res, CACHE_NAME);
           return res;
         })
         .catch(() =>
@@ -50,9 +55,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
-          if (isCacheable(res)) {
-            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(event.request, res.clone()));
-          }
+          if (isCacheable(res)) tryCache(event.request, res, DYNAMIC_CACHE);
           return res;
         })
         .catch(() => caches.match(event.request))
@@ -65,9 +68,7 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
         .then((res) => {
-          if (isCacheable(res)) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
-          }
+          if (isCacheable(res)) tryCache(event.request, res, CACHE_NAME);
           return res;
         })
         .catch(() => undefined);

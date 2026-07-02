@@ -46,6 +46,12 @@ function closeMobileMenu() {
 }
 
 export function initNavbar() {
+  const homeLink = document.querySelector('.nav-link[href="/index.html#home"]');
+  if (homeLink) {
+    const isHomePage = document.body.getAttribute('data-page') === 'index';
+    homeLink.closest('.nav-item').style.display = isHomePage ? 'none' : '';
+  }
+
   const menuToggle = document.getElementById("menuToggle");
   const navLinks = document.getElementById("navLinks");
 
@@ -215,7 +221,9 @@ function initDropdowns() {
       document.querySelectorAll(".has-dropdown.open").forEach((el) => {
         el.classList.remove("open");
       });
-      dropdownToggles.forEach((toggle) => {
+      // Re-query the live toggles: the ones captured above were replaced via
+      // cloneNode/replaceChild, so the original NodeList holds detached nodes.
+      document.querySelectorAll(".dropdown-toggle").forEach((toggle) => {
         toggle.setAttribute("aria-expanded", "false");
       });
     }
@@ -636,4 +644,6 @@ function initNavbarSearch() {
 }
 
 // Export all functions
-export { initNavbar, closeMobileMenu, lockBodyScroll, unlockBodyScroll };
+// Note: initNavbar is already exported inline at its declaration, so it must
+// not be re-exported here — a duplicate export makes the whole module fail to load.
+export { closeMobileMenu, lockBodyScroll, unlockBodyScroll };
