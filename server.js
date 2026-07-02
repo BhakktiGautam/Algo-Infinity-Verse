@@ -4,6 +4,7 @@ import http from "http";
 import { execFile } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import { FieldValue } from "firebase-admin/firestore";
 import { initializeFirebase, getDb, COLLECTIONS } from "./firebase.js";
 import { verifyCsrfToken } from "./utils/csrf-verify.js";
 import multer from "multer";
@@ -99,10 +100,14 @@ function validateMagicBytes(buffer, mimeType) {
 }
 const userSocketMap = new Map();
 const studyRooms = new Map();
+const memoryUserStore = new Map();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, "data");
+const IS_VERCEL = process.env.VERCEL === "1";
+const DATA_DIR = IS_VERCEL
+  ? path.join("/tmp", "algo-infinity-verse")
+  : path.join(ROOT, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const MEMORY_FILE = path.join(DATA_DIR, "memory.json");
 const TEAM_PROFILES_FILE = path.join(DATA_DIR, "team_profiles.json");
@@ -254,23 +259,40 @@ async function createUser(userData) {
 }
 
 async function ensureUserStore() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
   try {
-    await fs.access(USERS_FILE);
-  } catch {
-    await fs.writeFile(USERS_FILE, "[]\n");
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    try {
+      await fs.access(USERS_FILE);
+    } catch {
+      await fs.writeFile(USERS_FILE, "[]\n");
+    }
+  } catch (err) {
+    console.error("[ensureUserStore] Failed to initialize user store:", err);
   }
 }
 
 async function readUsers() {
   await ensureUserStore();
-  const raw = await fs.readFile(USERS_FILE, "utf8");
-  return JSON.parse(raw || "[]");
+  try {
+    const raw = await fs.readFile(USERS_FILE, "utf8");
+    const users = JSON.parse(raw || "[]");
+    users.forEach((u) => memoryUserStore.set(u.email, u));
+    return users;
+  } catch (err) {
+    console.error("[readUsers] Failed to read users:", err);
+    return Array.from(memoryUserStore.values());
+  }
 }
 
 async function writeUsers(users) {
   await ensureUserStore();
-  await fs.writeFile(USERS_FILE, `${JSON.stringify(users, null, 2)}\n`);
+  try {
+    await fs.writeFile(USERS_FILE, `${JSON.stringify(users, null, 2)}\n`);
+    users.forEach((u) => memoryUserStore.set(u.email, u));
+  } catch (err) {
+    console.error("[writeUsers] Failed to write users:", err);
+    users.forEach((u) => memoryUserStore.set(u.email, u));
+  }
 }
 
 async function ensureAuditsStore() {
@@ -465,6 +487,10 @@ function appendToJsonArrayFile(filePath, entry, maxEntries = 1000) {
 // ──────────────────────────────────────────────────────────────────────────
 
 async function readJsonBody(req) {
+  if (req.body && typeof req.body === "object") return req.body;
+  if (req.body && typeof req.body === "string") {
+    try { return JSON.parse(req.body); } catch { return {}; }
+  }
   let body = "";
   for await (const chunk of req) {
     body += chunk;
@@ -570,7 +596,9 @@ function isSameOriginRequest(req) {
   for (const header of [req.headers.origin, req.headers.referer]) {
     if (!header) continue;
     try {
-      if (new URL(header).host === host) return true;
+      const requestHost = host.split(":")[0];
+      const urlHost = new URL(header).host.split(":")[0];
+      if (urlHost && requestHost && urlHost === requestHost) return true;
     } catch {
       // Malformed Origin/Referer header — treat as untrusted.
     }
@@ -594,7 +622,7 @@ async function handleApi(req, res, pathname) {
                         .update(secret)
                         .digest("hex");
     const isProd = process.env.NODE_ENV === "production";
-    const cookieString = `csrfSecret=${secret}; HttpOnly; ${isProd ? "Secure; " : ""}SameSite=Strict; Path=/; Max-Age=3600`;
+    const cookieString = `csrfSecret=${secret}; HttpOnly; ${isProd ? "Secure; " : ""}SameSite=Lax; Path=/; Max-Age=3600`;
     return sendJson(res, 200, { csrfToken: token }, { "Set-Cookie": cookieString });
   }
 
@@ -1346,11 +1374,15 @@ if (pathname === "/api/session" && req.method === "GET") {
         createdAt: new Date().toISOString(),
         isDeactivated: false,
         deactivatedAt: null,
-        emailVerified: true,
+        emailVerified: false,
         verifyToken,
         verifyTokenExpiry: Date.now() + 24 * 60 * 60 * 1000,
       };
       await createUser(user);
+
+      sendVerificationEmail(email, user.name, verifyToken).catch((err) =>
+        console.error("[email] Signup verification failed:", err)
+      );
 
       const token = createAccessToken(user);
       const refreshToken = createRefreshToken(user);
@@ -1775,17 +1807,19 @@ if (pathname === "/api/forgot-password" && req.method === "POST") {
       const { initializeApp, getApps } = await import("firebase/app");
       const { getAuth, sendPasswordResetEmail } = await import("firebase/auth");
 
-      const configRes = await fetch(`http://127.0.0.1:${process.env.PORT || 3000}/api/firebase-config`);
-      const firebaseConfig = await configRes.json();
+      const firebaseConfig = {
+        apiKey: process.env.FIREBASE_API_KEY,
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.FIREBASE_APP_ID,
+      };
 
-      if (firebaseConfig.configured) {
+      if (firebaseConfig.projectId) {
         const existingApps = getApps();
         const clientApp = existingApps.find(a => a.name === "reset-client") ||
-          initializeApp({
-            apiKey: firebaseConfig.apiKey,
-            authDomain: firebaseConfig.authDomain,
-            projectId: firebaseConfig.projectId,
-          }, "reset-client");
+          initializeApp(firebaseConfig, "reset-client");
 
         const auth = getAuth(clientApp);
         await sendPasswordResetEmail(auth, email);
@@ -1798,7 +1832,6 @@ if (pathname === "/api/forgot-password" && req.method === "POST") {
     // Always return success to prevent email enumeration
     return sendJson(res, 200, { message: "Reset email sent if account exists." });
   }
-
   if (pathname === "/api/feedback" && req.method === "POST") {
     const session = getSession(req);
     let payload;
@@ -2444,22 +2477,8 @@ if (pathname === "/api/forgot-password" && req.method === "POST") {
     const difficulty = ["Easy", "Medium", "Hard"].includes(body.difficulty) ? body.difficulty : "Medium";
     const topic = body.topic || "arrays";
 
-    // Generate a unique room ID, retrying on collision so a new room can
-    // never silently overwrite (evict) an existing one.
-    let roomId;
-    for (let attempt = 0; ; attempt++) {
-      const candidate = "ROOM-" + Math.floor(10000 + Math.random() * 90000);
-      if (!studyRooms.has(candidate)) {
-        roomId = candidate;
-        break;
-      }
-      // Fall back to a collision-resistant ID if the small space is saturated.
-      if (attempt >= 10) {
-        roomId = "ROOM-" + crypto.randomUUID();
-        break;
-      }
-    }
-
+    const roomId = "ROOM-" + Math.floor(10000 + Math.random() * 90000);
+    
     let hostName = "Host";
     const users = await readUsers();
     const hostUser = users.find(u => u.id === session.sub);
@@ -3007,7 +3026,7 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
-const server = http.createServer(async (req, res) => {
+async function requestHandler(req, res) {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     const pathname = normalizePathname(decodeURIComponent(url.pathname));
@@ -3039,7 +3058,9 @@ const server = http.createServer(async (req, res) => {
     console.error(error);
     sendJson(res, 500, { error: "Something went wrong." });
   }
-});
+}
+
+const server = http.createServer(requestHandler);
 
 // ===== CODE ANALYSIS ENGINE =====
 // Used by the POST /api/predict-acceptance route in handleApi().
@@ -3483,11 +3504,21 @@ socket.on('voice-ice', ({ roomId, candidate, to, from }) => {
 });
 // -----------------------------------------
 
-export { server, hashPassword, passwordMatches, applySM2, validateSignup, updateMemoryStore, readMemoryStore, appendToJsonArrayFile };
+export { server, requestHandler, hashPassword, passwordMatches, applySM2, validateSignup, updateMemoryStore, readMemoryStore, appendToJsonArrayFile };
+
 if (process.env.VERCEL === "1") {
   db = initializeFirebase();
   useFirestore = !!db;
+  if (!process.env.SESSION_SECRET) {
+    throw new Error("FATAL: SESSION_SECRET is required on Vercel. Set it in the Vercel dashboard under Project Settings > Environment Variables.");
+  }
 }
+
+const vercelHandler = process.env.VERCEL === "1"
+  ? async (req, res) => requestHandler(req, res)
+  : undefined;
+
+export default vercelHandler;
 
 
 
