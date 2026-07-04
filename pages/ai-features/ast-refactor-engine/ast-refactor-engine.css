@@ -200,6 +200,7 @@ body.ast-body {
     background-image: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
     border-right: 1px solid var(--glass-border);
     position: relative;
+    overflow: auto; /* Enable scrolling */
 }
 
 .formula-badge {
@@ -217,7 +218,7 @@ body.ast-body {
     position: relative;
     width: 100%;
     height: calc(100% - 50px);
-    overflow: hidden;
+    overflow: auto; /* Enable scrolling for content */
 }
 
 .ast-svg-canvas {
