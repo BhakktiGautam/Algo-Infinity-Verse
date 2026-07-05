@@ -1301,13 +1301,13 @@ function initPracticeSection() {
            });
            
            renderProblems();
-           alert("AI Recommendation: " + rec.reason + "\n\n" + (rec.aiTip || ""));
+           console.warn("Alert:", "AI Recommendation: " + rec.reason + "\n\n" + (rec.aiTip || ""));
         } else {
-           alert("Could not get recommendation.");
+           console.warn("Alert:", "Could not get recommendation.");
         }
       } catch (err) {
          console.error("AI recommend error:", err);
-         alert("Failed to fetch recommendation.");
+         console.warn("Alert:", "Failed to fetch recommendation.");
       } finally {
          aiRecommendBtn.innerHTML = '<i class="fas fa-magic"></i> AI Recommend Next';
          aiRecommendBtn.disabled = false;
@@ -1594,56 +1594,30 @@ const roadmapSteps = [
 
 const advancedRoadmapSteps = [
   { id: 7, title: "Advanced Arrays & Optimization", icon: "fa-bolt", desc: "Master complex array manipulations, sliding window, and two-pointer techniques.", theory: `<p><strong>Advanced Array Optimization:</strong> Optimizing array operations from O(N²) to O(N) or O(N log N).</p><p><strong>Sliding Window:</strong> Used to track contiguous subarrays.</p><p><strong>Trapping Rain Water Pattern:</strong> Two-pointer technique to solve complex optimization problems.</p>`, type: "coding", problems: [9, 5], complexity: [{ op: "Trapping Rain Water (Two Pointers)", time: "O(N)", space: "O(1)" }, { op: "LRU Cache Get / Put Operations", time: "O(1)", space: "O(Capacity)" }] },
-  { id: 8, title: "Advanced Dynamic Programming", icon: "fa-layer-group", desc: "Learn advanced DP optimizations, multi-dimensional DP, and sequence matching techniques.", theory: `<p><strong>Advanced DP Concepts:</strong> Identifying states with multiple dimensions.</p><p><strong>Longest Increasing Subsequence (LIS):</strong> Can be optimized from O(N²) to O(N log N).</p><p><strong>Space Optimization:</strong> Reduce space complexity from O(N) to O(1) when state depends only on previous states.</p>`, type: "coding", problems: [7, 14], complexity: [{ op: "LIS (Naive DP)", time: "O(N²)", space: "O(N)" }, { op: "LIS (DP + Binary Search)", time: "O(N log N)", space: "O(N)" }, { op: "House Robber (Tabulation)", time: "O(N)", space: "O(N)" }, { op: "House Robber (Space Optimized)", time: "O(N)", space: "O(1)" }] },
-  { id: 9, title: "Advanced Graph Algorithms", icon: "fa-circle-nodes", desc: "Solve complex graph problems using shortest path, cycle detection, topological sorting, and BFS/DFS.", theory: `<p><strong>Advanced Graphs:</strong> Complex graph traversal strategies.</p><p><strong>Topological Sort:</strong> Ordering of vertices in a DAG.</p><p><strong>Word Ladder (BFS State Space Search):</strong> BFS to find shortest path.</p><p><strong>Grid DFS/BFS (Flood Fill):</strong> Traversing matrix structures.</p>`, type: "coding", problems: [8, 13, 15], complexity: [{ op: "BFS Shortest Path (Word Ladder)", time: "O(M² * N)", space: "O(M² * N)" }, { op: "DFS Island Counting", time: "O(R * C)", space: "O(R * C)" }, { op: "Topological Sort", time: "O(V + E)", space: "O(V + E)" }] },
-  { id: 10, title: "Advanced Optimization & Interview Strategies", icon: "fa-crown", desc: "Master interview-level optimization techniques, bit manipulation, and competitive programming tips.", theory: `<p><strong>Final Interview Strategies:</strong> Optimal time/space balances.</p><p><strong>Bit Manipulation:</strong> Using bitwise operations for O(1) space and fast execution.</p><p><strong>Backtracking Pruning:</strong> Cutting off recursive paths early.</p>`, type: "quiz", quiz: [{ question: "Which technique is most appropriate for finding the shortest path in an unweighted graph?", options: ["DFS", "BFS", "Dijkstra", "Kruskal"], correct: 1, explanation: "BFS explores layer by layer and is guaranteed to find the shortest path." }, { question: "What is the optimal time complexity of LIS?", options: ["O(N²)", "O(N log N)", "O(N)", "O(2^N)"], correct: 1, explanation: "LIS can be solved in O(N log N) using DP with binary search." }, { question: "How can we optimize space complexity of House Robber from O(N) to O(1)?", options: ["Using a binary search tree", "Keeping track of last two values", "Using a hash map", "Not possible"], correct: 1, explanation: "Since each state only depends on the previous two states, we only need two variables." }], complexity: [{ op: "Bitwise Operations", time: "O(1)", space: "O(1)" }, { op: "Pruned Backtracking Search", time: "O(Branch^Depth)", space: "O(Depth)" }] }
 ];
 
-let roadmapTabsInitialized = false;
-let roadmapStagesInitialized = false;
-let currentQuizAnswers = {};
-let currentRoadmapSearch = '';
-
-/* Temporarily disabled because roadmapAdvancedTab is not present in the current HTML structure.*/
 function initRoadmap() {
+  const basicTab = document.getElementById("roadmapBasicTab");
+  const advancedTab = document.getElementById("roadmapAdvancedTab");
+  const overviewTab = document.getElementById("roadmapOverviewTab");
+
   if (!roadmapTabsInitialized) {
-    const basicTab = document.getElementById("roadmapBasicTab");
-    //const advancedTab = document.getElementById("roadmapAdvancedTab");
-    const overviewTab = document.getElementById("roadmapOverviewTab");
-    
-    if (basicTab || advancedTab || overviewTab) {
-      if (basicTab) basicTab.addEventListener("click", () => {
-        [basicTab, advancedTab, overviewTab].forEach(t => t && t.classList.remove("active"));
-        basicTab.classList.add("active");
-        ["basicRoadmapContainer","advancedRoadmapContainer","overviewRoadmapContainer"].forEach(id => {
+      const tabs = [basicTab, advancedTab, overviewTab];
+      const containerIds = ["basicRoadmapContainer","advancedRoadmapContainer","overviewRoadmapContainer"];
+      const activateTab = (tab, containerId) => {
+        tabs.forEach(t => t && t.classList.remove("active"));
+        tab.classList.add("active");
+        containerIds.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.classList.remove("active");
         });
-        const basic = document.getElementById("basicRoadmapContainer");
-        if (basic) basic.classList.add("active");
-      });
+        const container = document.getElementById(containerId);
+        if (container) container.classList.add("active");
+      };
 
-      if (advancedTab) advancedTab.addEventListener("click", () => {
-        [basicTab, advancedTab, overviewTab].forEach(t => t && t.classList.remove("active"));
-        advancedTab.classList.add("active");
-        ["basicRoadmapContainer","advancedRoadmapContainer","overviewRoadmapContainer"].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.remove("active");
-        });
-        const advanced = document.getElementById("advancedRoadmapContainer");
-        if (advanced) advanced.classList.add("active");
-      });
-
-      if (overviewTab) overviewTab.addEventListener("click", () => {
-        [basicTab, advancedTab, overviewTab].forEach(t => t && t.classList.remove("active"));
-        overviewTab.classList.add("active");
-        ["basicRoadmapContainer","advancedRoadmapContainer","overviewRoadmapContainer"].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.remove("active");
-        });
-        const overview = document.getElementById("overviewRoadmapContainer");
-        if (overview) overview.classList.add("active");
-      });
+      if (basicTab) basicTab.addEventListener("click", () => activateTab(basicTab, "basicRoadmapContainer"));
+      if (advancedTab) advancedTab.addEventListener("click", () => activateTab(advancedTab, "advancedRoadmapContainer"));
+      if (overviewTab) overviewTab.addEventListener("click", () => activateTab(overviewTab, "overviewRoadmapContainer"));
     }
     
     // Close button for step modal
@@ -1734,7 +1708,7 @@ function initRoadmap() {
     }, 500);
   }
 }
-}
+
 
 function isRoadmapStepCompleted(step) {
   if (step.type === "quiz") return userProgress.completedRoadmapSteps.includes(step.id);
@@ -1972,7 +1946,104 @@ function updateFreezeHistoryList() {
 function updateBadges() {
   const container = document.getElementById("badgesContainer");
   const grid = document.getElementById("badgesGrid");
-  const badges = [{ id: 1, icon: "🌟", name: "First Steps", description: "Begin your journey", criteria: "Solve 1 problem", earned: userProgress.completedProblems.length >= 1 }, { id: 2, icon: "🔥", name: "On Fire", description: "Keep the momentum going", criteria: "Maintain a 7-day streak", earned: userProgress.streak >= 7 }, { id: 3, icon: "💎", name: "Diamond", description: "Reach a major XP milestone", criteria: "Earn 5,000 XP", earned: userProgress.xp >= 5000 }, { id: 4, icon: "🚀", name: "Rocket", description: "Speed through problems", criteria: "Solve 50 problems", earned: userProgress.completedProblems.length >= 50 }, { id: 5, icon: "👑", name: "Master", description: "Achieve expert problem-solving", criteria: "Solve 100 problems", earned: userProgress.completedProblems.length >= 100 }, { id: 6, icon: "🎯", name: "Sharpshooter", description: "Hit the target with consistency", criteria: "Solve 25 problems and earn 2,500 XP", earned: userProgress.completedProblems.length >= 25 && userProgress.xp >= 2500 }];
+
+  const badges = [
+    {
+      id: 1,
+      icon: "🌟",
+      name: "First Steps",
+      description: "Begin your journey",
+      criteria: "Solve 1 problem",
+      earned: userProgress.completedProblems.length >= 1,
+    },
+    {
+      id: 2,
+      icon: "🔥",
+      name: "On Fire",
+      description: "Keep the momentum going",
+      criteria: "Maintain a 7-day streak",
+      earned: userProgress.streak >= 7,
+    },
+    {
+      id: 3,
+      icon: "💎",
+      name: "Diamond",
+      description: "Reach a major XP milestone",
+      criteria: "Earn 5,000 XP",
+      earned: userProgress.xp >= 5000,
+    },
+    {
+      id: 4,
+      icon: "🚀",
+      name: "Rocket",
+      description: "Speed through problems",
+      criteria: "Solve 50 problems",
+      earned: userProgress.completedProblems.length >= 50,
+    },
+    {
+      id: 5,
+      icon: "👑",
+      name: "Master",
+      description: "Achieve expert problem-solving",
+      criteria: "Solve 100 problems",
+      earned: userProgress.completedProblems.length >= 100,
+    },
+    {
+      id: 6,
+      icon: "🎯",
+      name: "Sharpshooter",
+      description: "Hit the target with consistency",
+      criteria: "Solve 25 problems and earn 2,500 XP",
+      earned:
+        userProgress.completedProblems.length >= 25 && userProgress.xp >= 2500,
+    },
+  ];
+
+  // Update userProgress badges
+  const newlyEarned = badges.filter((b) => b.earned).map((b) => b.id);
+
+  // Only save if badges changed to avoid unnecessary saves
+  const badgesChanged =
+    JSON.stringify(newlyEarned) !== JSON.stringify(userProgress.badges);
+  userProgress.badges = newlyEarned;
+  if (badgesChanged) {
+    saveUserData();
+  }
+
+  // Dashboard badges
+  if (container) {
+  container.innerHTML = badges
+    .map(
+      (badge) =>
+        `<div class="badge ${badge.earned ? "" : "locked"}" tabindex="0" aria-label="${badge.name}: ${badge.description}. ${badge.criteria}">
+            ${badge.icon}
+            <span class="badge-tooltip">
+              <strong>${badge.name}</strong>
+              <span>${badge.description}</span>
+              <span>${badge.criteria}</span>
+            </span>
+        </div>`,
+    )
+    .join("");
+  }
+
+  // Gamification section badges
+  if (grid) {
+  grid.innerHTML = badges
+    .map(
+      (badge) =>
+        `<div class="badge-lg ${badge.earned ? "earned" : "locked"}" 
+          tabindex="0" 
+          title="${badge.name}: ${badge.criteria}"
+          onclick="${badge.earned ? "" : `showNotification('🔒 ${badge.criteria}', 'info')`}">
+          <span class="badge-icon">${badge.icon}</span>
+          <span class="badge-name">${badge.name}</span>
+          <span class="badge-criteria">${badge.earned ? "✅ Earned!" : badge.criteria}</span>
+        </div>`,
+    )
+    .join("");
+    
+  }
   const earned = badges.filter(b => b.earned).map(b => b.id);
   if (JSON.stringify(earned) !== JSON.stringify(userProgress.badges)) { userProgress.badges = earned; saveUserData(); }
   if (container) container.innerHTML = badges.map(badge => `<div class="badge ${badge.earned ? '' : 'locked'}" tabindex="0"><span class="badge-tooltip"><strong>${badge.name}</strong><span>${badge.description}</span><span>${badge.criteria}</span></span>${badge.icon}</div>`).join("");
@@ -2074,6 +2145,82 @@ function checkLevelUp() {
   if (levelBadge) levelBadge.textContent = `Level ${newLevel} - ${levelNames[newLevel - 1]}`;
 }
 
+function updateGamification() {
+  updateXPBar();
+  updateBadges();
+  updateStreakDisplay();
+  updateActivityFeed();
+  updateXPStats();
+}
+
+function updateXPStats() {
+  const totalProblems = document.getElementById("totalProblemsCount");
+  const streakEl = document.getElementById("streakCount");
+  const totalXP = document.getElementById("totalXPCount");
+  const nextLevel = document.getElementById("xpNextLevel");
+  const badgesCount = document.getElementById("badgesEarnedCount");
+
+  if (totalProblems) totalProblems.textContent = userProgress.completedProblems.length;
+  if (streakEl) streakEl.textContent = `${userProgress.streak || 0}🔥`;
+  if (totalXP) totalXP.textContent = userProgress.xp || 0;
+
+  const levelNames = ["Beginner","Novice","Intermediate","Advanced","Expert","Master","Grandmaster","Legend"];
+  const currentLevel = userProgress.level || 1;
+  if (nextLevel) nextLevel.textContent = `Next: ${levelNames[currentLevel] || "Legend"}`;
+
+  const earned = userProgress.badges ? userProgress.badges.length : 0;
+  if (badgesCount) badgesCount.textContent = `${earned}/6 earned`;
+}
+
+function updateStreakDisplay() {
+  const streakNum = document.getElementById("streakNumber");
+  const bestStreakEl = document.getElementById("bestStreak");
+  const streakWeek = document.getElementById("streakWeek");
+
+  const streak = userProgress.streak || 0;
+  const bestStreak = userProgress.bestStreak || streak;
+
+  if (streakNum) streakNum.textContent = streak;
+  if (bestStreakEl) bestStreakEl.textContent = bestStreak;
+
+  if (streakWeek) {
+    const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const today = new Date().getDay();
+    streakWeek.innerHTML = days.map((day, i) => {
+      const isActive = i < streak && i <= today;
+      return `
+        <div class="streak-day ${isActive ? "active" : "inactive"}">
+          <span>${isActive ? "🔥" : "○"}</span>
+          <span>${day}</span>
+        </div>
+      `;
+    }).join("");
+  }
+}
+
+function updateActivityFeed() {
+  const activityList = document.getElementById("activityList");
+  if (!activityList) return;
+
+  const completed = userProgress.completedProblems || [];
+  if (completed.length === 0) {
+    activityList.innerHTML = `<p class="activity-empty">No activity yet. Start solving problems! 🚀</p>`;
+    return;
+  }
+
+  const recent = completed.slice(-5).reverse();
+  activityList.innerHTML = recent.map(id => {
+    const problem = practiceProblems.find(p => p.id === id);
+    if (!problem) return "";
+    const xp = getXPForDifficulty(problem.difficulty);
+    return `
+      <div class="activity-item">
+        <span class="activity-name">✅ ${problem.title}</span>
+        <span class="activity-xp">+${xp} XP</span>
+      </div>
+    `;
+  }).join("");
+}
 function updateGamification() { updateXPBar(); updateBadges(); }
 
 function showNotification(message, type = "info") {
@@ -4274,7 +4421,7 @@ function trackBadgeEarned(badgeName) {
         const nameVal = nameInput ? nameInput.value.trim() : "";
         
         if (!nameVal) {
-            alert("Please enter a valid display name.");
+            console.warn("Alert:", "Please enter a valid display name.");
             return;
         }
         
@@ -4924,6 +5071,373 @@ function getProblemById(id) {
 
 
 // ============================================
+// ACTIVITY FEED
+// ============================================
+
+const ACTIVITY_STORAGE_KEY = 'userActivities';
+const MAX_ACTIVITIES = 50;
+
+/**
+ * Get all activities from localStorage
+ * @returns {Array} List of activities
+ */
+function getActivities() {
+    try {
+        const data = localStorage.getItem(ACTIVITY_STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        console.warn('Could not load activities:', e);
+        return [];
+    }
+}
+
+/**
+ * Get recent activities
+ * @param {number} limit - Number of activities to return
+ * @returns {Array} Recent activities
+ */
+function getRecentActivities(limit = 10) {
+    const activities = getActivities();
+    return activities.slice(0, limit);
+}
+
+/**
+ * Add a new activity
+ * @param {string} type - Activity type (solved, quiz, badge, streak, level, xp, practice)
+ * @param {Object} data - Activity data
+ * @param {string} data.message - Main message
+ * @param {string} data.detail - Additional detail (optional)
+ */
+function addActivity(type, data) {
+    const activities = getActivities();
+    
+    const activity = {
+        id: Date.now(),
+        type: type,
+        message: data.message || '',
+        detail: data.detail || '',
+        timestamp: new Date().toISOString(),
+        data: data
+    };
+    
+    activities.unshift(activity);
+    
+    // Keep only last MAX_ACTIVITIES
+    if (activities.length > MAX_ACTIVITIES) {
+        activities.length = MAX_ACTIVITIES;
+    }
+    
+    localStorage.setItem(ACTIVITY_STORAGE_KEY, JSON.stringify(activities));
+    
+    // Re-render activity feed
+    renderActivityFeed();
+}
+
+/**
+ * Clear all activities
+ */
+function clearActivities() {
+    if (confirm('Are you sure you want to clear all activity history?')) {
+        localStorage.removeItem(ACTIVITY_STORAGE_KEY);
+        renderActivityFeed();
+        showNotification('Activity history cleared', 'info');
+    }
+}
+
+/**
+ * Get icon for activity type
+ * @param {string} type - Activity type
+ * @returns {string} Icon HTML
+ */
+function getActivityIcon(type) {
+    const icons = {
+        solved: '✅',
+        quiz: '📝',
+        badge: '🏆',
+        streak: '🔥',
+        level: '⬆️',
+        xp: '⭐',
+        practice: '💻'
+    };
+    return icons[type] || '📌';
+}
+
+/**
+ * Get CSS class for activity type
+ * @param {string} type - Activity type
+ * @returns {string} CSS class
+ */
+function getActivityClass(type) {
+    const classes = {
+        solved: 'solved',
+        quiz: 'quiz',
+        badge: 'badge',
+        streak: 'streak',
+        level: 'level',
+        xp: 'xp',
+        practice: 'practice'
+    };
+    return classes[type] || 'practice';
+}
+
+/**
+ * Format time for display
+ * @param {string} timestamp - ISO timestamp
+ * @returns {string} Formatted time
+ */
+function formatActivityTime(timestamp) {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric'
+    });
+}
+
+/**
+ * Render activity feed
+ */
+function renderActivityFeed() {
+    const container = document.getElementById('activityFeed');
+    if (!container) return;
+    
+    const activities = getRecentActivities(10);
+    const countEl = document.getElementById('activityCount');
+    
+    if (countEl) {
+        const total = getActivities().length;
+        countEl.textContent = `${total} activity${total !== 1 ? 'ies' : ''}`;
+    }
+    
+    if (activities.length === 0) {
+        container.innerHTML = `
+            <div class="activity-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No recent activity yet. Start solving problems!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = activities.map((activity, index) => {
+        const icon = getActivityIcon(activity.type);
+        const typeClass = getActivityClass(activity.type);
+        const time = formatActivityTime(activity.timestamp);
+        const isNew = index === 0;
+        
+        return `
+            <div class="activity-item ${isNew ? 'new' : ''}">
+                <div class="activity-icon ${typeClass}">${icon}</div>
+                <div class="activity-content">
+                    <p class="activity-message">${activity.message}</p>
+                    ${activity.detail ? `<p class="activity-detail">${activity.detail}</p>` : ''}
+                </div>
+                <span class="activity-time">${time}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Track problem solved activity
+ * @param {string} problemName - Name of the problem
+ * @param {string} difficulty - Difficulty level
+ */
+function trackProblemSolved(problemName, difficulty = '') {
+    addActivity('solved', {
+        message: `Solved <strong>${problemName}</strong>`,
+        detail: difficulty ? `Difficulty: ${difficulty}` : '',
+        problem: problemName,
+        difficulty: difficulty
+    });
+}
+
+/**
+ * Track quiz completed activity
+ * @param {string} topic - Topic name
+ * @param {number} score - Score percentage
+ */
+function trackQuizCompleted(topic, score) {
+    addActivity('quiz', {
+        message: `Completed <strong>${topic}</strong> quiz`,
+        detail: `Score: ${score}%`,
+        topic: topic,
+        score: score
+    });
+}
+
+/**
+ * Track badge earned activity
+ * @param {string} badgeName - Name of the badge
+ */
+function trackBadgeEarned(badgeName) {
+    addActivity('badge', {
+        message: `Earned <strong>${badgeName}</strong> badge 🏆`,
+        detail: '',
+        badge: badgeName
+    });
+}
+
+/**
+ * Track streak milestone activity
+ * @param {number} streak - Current streak count
+ */
+function trackStreakMilestone(streak) {
+    addActivity('streak', {
+        message: `Achieved <strong>${streak}-day</strong> streak 🔥`,
+        detail: 'Keep going!',
+        streak: streak
+    });
+}
+
+/**
+ * Track level up activity
+ * @param {number} level - New level
+ * @param {string} levelName - Level name
+ */
+function trackLevelUp(level, levelName) {
+    addActivity('level', {
+        message: `Reached <strong>Level ${level}</strong> - ${levelName} ⬆️`,
+        detail: 'Keep climbing!',
+        level: level
+    });
+}
+
+/**
+ * Track XP earned activity
+ * @param {number} xp - XP earned
+ * @param {string} source - Source of XP
+ */
+function trackXPEarned(xp, source = '') {
+    addActivity('xp', {
+        message: `Earned <strong>+${xp} XP</strong>`,
+        detail: source ? `From: ${source}` : '',
+        xp: xp,
+        source: source
+    });
+}
+
+/**
+ * Track practice activity
+ * @param {string} action - Action performed
+ */
+function trackPractice(action) {
+    addActivity('practice', {
+        message: `Practiced: <strong>${action}</strong>`,
+        detail: '',
+        action: action
+    });
+}
+
+// --- Initialize Activity Feed ---
+
+/**
+ * Initialize activity feed
+ */
+function initActivityFeed() {
+    renderActivityFeed();
+    
+    // Clear activity button
+    const clearBtn = document.getElementById('clearActivityBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearActivities);
+    }
+    
+    // View all button
+    const viewAllBtn = document.getElementById('viewAllActivityBtn');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', () => {
+            // Scroll to activity section or open modal
+            const activityCard = document.querySelector('.activity-feed-card');
+            if (activityCard) {
+                activityCard.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+}
+
+// --- Override existing tracking functions ---
+
+// If you have existing functions, override them
+const originalAddXP = window.addXP || function() {};
+window.addXP = function(amount, source = '', meta = {}) {
+    originalAddXP(amount, source, meta);
+    trackXPEarned(amount, source);
+};
+
+// Track when problem is solved
+const originalProblemSolved = window.handleProblemSolved || function() {};
+window.handleProblemSolved = function(problemName, difficulty) {
+    originalProblemSolved(problemName, difficulty);
+    trackProblemSolved(problemName, difficulty);
+};
+
+// --- Initialize on page load ---
+
+document.addEventListener('DOMContentLoaded', function() {
+    initActivityFeed();
+});
+
+// Export functions
+export {
+    getActivities,
+    getRecentActivities,
+    addActivity,
+    clearActivities,
+    renderActivityFeed,
+    trackProblemSolved,
+    trackQuizCompleted,
+    trackBadgeEarned,
+    trackStreakMilestone,
+    trackLevelUp,
+    trackXPEarned,
+    trackPractice,
+    initActivityFeed
+};
+
+// In your quiz completion function
+function completeQuiz(topic, score) {
+    // ... existing code ...
+    trackQuizCompleted(topic, score);
+    // ... existing code ...
+}
+
+// In your badge earning function
+function earnBadge(badgeName) {
+    // ... existing code ...
+    trackBadgeEarned(badgeName);
+    // ... existing code ...
+}
+
+// In your level up function
+function checkLevelUp() {
+    // ... existing code ...
+    if (newLevel > userProgress.level) {
+        trackLevelUp(newLevel, levelNames[newLevel - 1]);
+    }
+    // ... existing code ...
+}
+
+// In your streak update function
+function updateStreak() {
+    // ... existing code ...
+    if (userProgress.streak > 0 && userProgress.streak % 7 === 0) {
+        trackStreakMilestone(userProgress.streak);
+    }
+    // ... existing code ...
+
+
+// ============================================
 // PROBLEM FILTERING WITH CORRECT COUNT
 // ============================================
 
@@ -5315,6 +5829,10 @@ function updateProblemCount(filteredProblems) {
     if (countElement) {
         countElement.textContent = `${total} problem${total !== 1 ? 's' : ''}`;
     }
+
+
+}
+
 }
 
 

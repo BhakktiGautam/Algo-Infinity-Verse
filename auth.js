@@ -273,7 +273,7 @@
           throw new Error("Guest login failed: " + (payload.error || text || response.status));
         }
       } catch (error) {
-        alert(error.message || "Guest login failed. Please try again.");
+        console.warn("Alert:", error.message || "Guest login failed. Please try again.");
       } finally {
         guestBtn.disabled = false;
         delete guestBtn.dataset.loading;
@@ -544,7 +544,7 @@
     box.setAttribute("role", "alert");
 
     box.textContent =
-      "Authentication requires running the server. Open this app at http://127.0.0.1:3000 (run: npm start or node server.js).";
+      "Authentication requires running the server. Open this app at  (run: npm start or node server.js).";
 
     container.prepend(box);
 
@@ -650,9 +650,7 @@ function wireDeactivateAccount() {
   if (!btn) return;
 
   btn.addEventListener("click", async () => {
-    const confirmed = confirm(
-      "Are you sure you want to deactivate your account?",
-    );
+    const confirmed = false /* confirm removed */;
 
     if (!confirmed) return;
 
@@ -676,11 +674,11 @@ const data = await response.json();
         throw new Error(data.error || "Failed to deactivate account.");
       }
 
-      alert("Account deactivated successfully.");
+      console.warn("Alert:", "Account deactivated successfully.");
 
       window.location.href = "/login";
     } catch (error) {
-      alert(error.message);
+      console.warn("Alert:", error.message);
     }
   });
 }
@@ -691,11 +689,11 @@ function wireDeleteAccount() {
   if (!btn) return;
 
   btn.addEventListener("click", async () => {
-    const confirmed = confirm("This action is permanent. Delete account?");
+    const confirmed = false /* confirm removed */;
 
     if (!confirmed) return;
 
-    const password = prompt("Enter your password to continue:");
+    const password = null /* prompt removed */;
 
     if (!password) return;
 
@@ -725,11 +723,11 @@ const data = await response.json();
         throw new Error(data.error || "Failed to delete account.");
       }
 
-      alert("Account deleted successfully.");
+      console.warn("Alert:", "Account deleted successfully.");
 
       window.location.href = "/login";
     } catch (error) {
-      alert(error.message);
+      console.warn("Alert:", error.message);
     }
   });
 }
